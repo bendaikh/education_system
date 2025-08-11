@@ -16,6 +16,10 @@ echo "🎨 Installing NPM dependencies and building assets..."
 npm ci
 npm run build
 
+# Copy build assets to root (for production structure)
+echo "📁 Copying build assets to root directory..."
+cp -r public/build ./ 2>/dev/null || true
+
 # Clear and cache Laravel configurations
 echo "⚙️ Optimizing Laravel..."
 php artisan config:clear
