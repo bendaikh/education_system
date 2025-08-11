@@ -1,0 +1,264 @@
+<script setup>
+import { computed, ref, onMounted } from 'vue';
+import { Link as InertiaLink, usePage } from '@inertiajs/vue3';
+
+const props = defineProps({
+    title: { type: String, default: '' },
+});
+
+const page = usePage();
+const isAuthenticated = computed(() => !!page.props.auth?.user);
+
+// Sidebar state - open by default on desktop, closed on mobile
+const sidebarOpen = ref(false);
+
+// Set initial state based on screen size
+onMounted(() => {
+    // Check if we're on desktop (lg breakpoint = 1024px)
+    const isDesktop = window.innerWidth >= 1024;
+    sidebarOpen.value = isDesktop;
+    
+    // Listen for window resize to adjust sidebar state
+    const handleResize = () => {
+        const isNowDesktop = window.innerWidth >= 1024;
+        // Only auto-open on desktop if it's currently closed
+        // Don't auto-close when switching from desktop to mobile
+        if (isNowDesktop && !sidebarOpen.value) {
+            sidebarOpen.value = true;
+        }
+    };
+    
+    window.addEventListener('resize', handleResize);
+    
+    // Cleanup event listener
+    return () => window.removeEventListener('resize', handleResize);
+});
+
+const toggleSidebar = () => {
+    sidebarOpen.value = !sidebarOpen.value;
+};
+
+// Handle navigation clicks - only close sidebar on mobile
+const handleNavClick = () => {
+    if (window.innerWidth < 1024) {
+        sidebarOpen.value = false;
+    }
+};
+
+const navItems = [
+    { label: 'Dashboard', href: '/admin/dashboard' },
+    { label: 'Classes', href: '/admin/classes' },
+    { label: 'Students', href: '/admin/students' },
+    { label: 'Teachers', href: '/admin/teachers' },
+    { label: 'Admins', href: '/admin/admins' },
+];
+</script>
+
+<template>
+    <div class="flex min-h-screen flex-col bg-white">
+        <!-- Header -->
+        <header class="flex items-center justify-between border-b border-gray-100 px-4 sm:px-6 lg:px-10 py-3">
+            <div class="flex items-center gap-2 sm:gap-4 text-gray-900">
+                <!-- Hamburger Menu Button -->
+                <button 
+                    @click="toggleSidebar"
+                    class="p-2 rounded-xl hover:bg-gradient-to-br hover:from-blue-50 hover:to-purple-50 transition-all duration-200 min-w-[44px] min-h-[44px] flex items-center justify-center border border-transparent hover:border-blue-200 hover:shadow-lg"
+                    :class="{ 'bg-gradient-to-br from-blue-50 to-purple-50 border-blue-200 shadow-md': sidebarOpen }"
+                >
+                    <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" class="transition-transform duration-200" :class="{ 'rotate-90': sidebarOpen }">
+                        <path d="M3 12H21M3 6H21M3 18H21" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                    </svg>
+                </button>
+                <svg viewBox="0 0 48 48" class="h-5 w-5 sm:h-6 sm:w-6 text-primary-600" fill="currentColor" xmlns="http://www.w3.org/2000/svg">
+                    <path d="M42.4379 44C42.4379 44 36.0744 33.9038 41.1692 24C46.8624 12.9336 42.2078 4 42.2078 4L7.01134 4C7.01134 4 11.6577 12.932 5.96912 23.9969C0.876273 33.9029 7.27094 44 7.27094 44L42.4379 44Z" />
+                </svg>
+                <h2 class="text-base sm:text-lg font-bold tracking-tight hidden xs:block">School Admin</h2>
+                <h2 class="text-base font-bold tracking-tight xs:hidden">Admin</h2>
+            </div>
+            <div class="flex items-center gap-1 sm:gap-3">
+                <!-- Notification bell -->
+                <button class="flex h-10 w-10 min-w-[44px] min-h-[44px] items-center justify-center rounded bg-gray-100 text-gray-900 sm:block hidden">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" fill="currentColor" viewBox="0 0 256 256">
+                        <path
+                            d="M221.8,175.94C216.25,166.38,208,139.33,208,104a80,80,0,1,0-160,0c0,35.34-8.26,62.38-13.81,71.94A16,16,0,0,0,48,200H88.81a40,40,0,0,0,78.38,0H208a16,16,0,0,0,13.8-24.06ZM128,216a24,24,0,0,1-22.62-16h45.24A24,24,0,0,1,128,216ZM48,184c7.7-13.24,16-43.92,16-80a64,64,0,1,1,128,0c0,36.05,8.28,66.73,16,80Z" />
+                    </svg>
+                </button>
+                <!-- User Info and Avatar -->
+                <div class="flex items-center gap-1 sm:gap-3">
+                    <div class="text-right hidden sm:block">
+                        <div class="text-sm font-medium text-gray-900">{{ page.props.auth?.user?.name }}</div>
+                        <div class="text-xs text-gray-500 capitalize">{{ page.props.auth?.user?.role }}</div>
+                    </div>
+                    <div class="size-8 sm:size-10 rounded-full bg-gray-300 flex items-center justify-center text-gray-600 font-semibold text-sm">
+                        {{ page.props.auth?.user?.name?.charAt(0)?.toUpperCase() || 'A' }}
+                    </div>
+                    <InertiaLink href="/logout" method="post" as="button" 
+                        class="ml-1 sm:ml-2 text-xs sm:text-sm text-gray-500 hover:text-gray-700 min-w-[44px] min-h-[44px] flex items-center justify-center">
+                        <span class="hidden sm:inline">Logout</span>
+                        <svg class="sm:hidden w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1"></path>
+                        </svg>
+                    </InertiaLink>
+                </div>
+            </div>
+        </header>
+
+        <div class="flex flex-1 gap-1 py-2 sm:py-5 px-2 sm:px-6 relative">
+            <!-- Mobile Overlay -->
+            <div 
+                v-if="sidebarOpen" 
+                @click="toggleSidebar"
+                class="fixed inset-0 bg-black/60 backdrop-blur-sm z-40 lg:hidden transition-all duration-300 ease-in-out"
+            ></div>
+            
+            <!-- Sidebar -->
+            <aside 
+                :class="[
+                    'transition-all duration-300 ease-in-out z-50',
+                    'sidebar-gradient',
+                    'shadow-2xl shadow-slate-900/20 border-r border-slate-700/50',
+                    // Mobile behavior - show/hide based on sidebarOpen state
+                    sidebarOpen ? 'block' : 'hidden',
+                    // Desktop behavior - always visible when open, hidden when closed
+                    'lg:block',
+                    // Positioning and sizing
+                    sidebarOpen ? 'fixed lg:relative inset-y-0 left-0 w-72 sm:w-80' : '',
+                    // Desktop width control
+                    sidebarOpen ? 'lg:w-80' : 'lg:w-0 lg:overflow-hidden'
+                ]"
+            >
+                <div class="flex h-full min-h-[700px] flex-col p-4 sm:p-6">
+                    <!-- Sidebar Header -->
+                    <div class="mb-8">
+                        <div class="flex items-center gap-3 mb-6">
+                            <div class="w-10 h-10 bg-gradient-to-br from-blue-400 to-purple-600 rounded-xl flex items-center justify-center shadow-lg">
+                                <svg viewBox="0 0 48 48" class="h-6 w-6 text-white" fill="currentColor" xmlns="http://www.w3.org/2000/svg">
+                                    <path d="M42.4379 44C42.4379 44 36.0744 33.9038 41.1692 24C46.8624 12.9336 42.2078 4 42.2078 4L7.01134 4C7.01134 4 11.6577 12.932 5.96912 23.9969C0.876273 33.9029 7.27094 44 7.27094 44L42.4379 44Z" />
+                                </svg>
+                            </div>
+                            <div>
+                                <h1 class="text-lg font-bold text-white">School Admin</h1>
+                                <p class="text-xs text-slate-300">Management Portal</p>
+                            </div>
+                        </div>
+                        
+                        <!-- User Profile in Sidebar -->
+                        <div class="bg-slate-800/50 rounded-xl p-4 border border-slate-700/50 backdrop-blur-sm">
+                            <div class="flex items-center gap-3">
+                                <div class="w-10 h-10 bg-gradient-to-br from-emerald-400 to-blue-500 rounded-full flex items-center justify-center text-white font-semibold text-sm shadow-lg">
+                                    {{ page.props.auth?.user?.name?.charAt(0)?.toUpperCase() || 'A' }}
+                                </div>
+                                <div class="flex-1 min-w-0">
+                                    <p class="text-sm font-medium text-white truncate">{{ page.props.auth?.user?.name }}</p>
+                                    <p class="text-xs text-slate-300 capitalize">{{ page.props.auth?.user?.role }}</p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Navigation -->
+                    <nav class="flex-1 space-y-2">
+                        <InertiaLink v-for="item in navItems" :key="'side-'+item.href" :href="item.href"
+                            :class="[
+                                'nav-item-glow group flex items-center gap-3 px-4 py-3 rounded-xl transition-all duration-200 min-h-[44px] relative overflow-hidden',
+                                $page.url.startsWith(item.href) 
+                                    ? 'bg-gradient-to-r from-blue-500 to-purple-600 text-white shadow-lg shadow-blue-500/25' 
+                                    : 'text-slate-300 hover:text-white hover:bg-slate-700/50 hover:shadow-lg hover:shadow-slate-900/20'
+                            ]"
+                            @click="handleNavClick">
+                            <!-- Icon for each nav item -->
+                            <div class="w-5 h-5 flex-shrink-0">
+                                <!-- Dashboard Icon -->
+                                <svg v-if="item.label === 'Dashboard'" class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 7v10a2 2 0 002 2h14a2 2 0 002-2V9a2 2 0 00-2-2H5a2 2 0 00-2-2z"></path>
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 5a2 2 0 012-2h4a2 2 0 012 2v6a2 2 0 01-2 2H10a2 2 0 01-2-2V5z"></path>
+                                </svg>
+                                <!-- Classes Icon -->
+                                <svg v-else-if="item.label === 'Classes'" class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18.477 18.246 18 16.5 18c-1.746 0-3.332.477-4.5 1.253"></path>
+                                </svg>
+                                <!-- Students Icon -->
+                                <svg v-else-if="item.label === 'Students'" class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197m13.5-9a2.5 2.5 0 11-5 0 2.5 2.5 0 015 0z"></path>
+                                </svg>
+                                <!-- Teachers Icon -->
+                                <svg v-else-if="item.label === 'Teachers'" class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"></path>
+                                </svg>
+                                <!-- Admins Icon -->
+                                <svg v-else-if="item.label === 'Admins'" class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.031 9-11.622 0-1.042-.133-2.052-.382-3.016z"></path>
+                                </svg>
+                            </div>
+                            <span class="font-medium">{{ item.label }}</span>
+                            <!-- Active indicator -->
+                            <div v-if="$page.url.startsWith(item.href)" class="absolute inset-y-0 left-0 w-1 bg-white rounded-r-full"></div>
+                        </InertiaLink>
+                        
+                        <!-- User Management -->
+                        <InertiaLink href="/admin/user-management"
+                            :class="[
+                                'nav-item-glow group flex items-center gap-3 px-4 py-3 rounded-xl transition-all duration-200 min-h-[44px] relative overflow-hidden',
+                                $page.url.startsWith('/admin/user-management') 
+                                    ? 'bg-gradient-to-r from-blue-500 to-purple-600 text-white shadow-lg shadow-blue-500/25' 
+                                    : 'text-slate-300 hover:text-white hover:bg-slate-700/50 hover:shadow-lg hover:shadow-slate-900/20'
+                            ]"
+                            @click="handleNavClick">
+                            <div class="w-5 h-5 flex-shrink-0">
+                                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197m13.5-9a2.5 2.5 0 11-5 0 2.5 2.5 0 015 0z"></path>
+                                </svg>
+                            </div>
+                            <span class="font-medium">User Management</span>
+                            <div v-if="$page.url.startsWith('/admin/user-management')" class="absolute inset-y-0 left-0 w-1 bg-white rounded-r-full"></div>
+                        </InertiaLink>
+                        
+                        <!-- Settings -->
+                        <InertiaLink href="/admin/settings"
+                            :class="[
+                                'nav-item-glow group flex items-center gap-3 px-4 py-3 rounded-xl transition-all duration-200 min-h-[44px] relative overflow-hidden',
+                                $page.url.startsWith('/admin/settings') 
+                                    ? 'bg-gradient-to-r from-blue-500 to-purple-600 text-white shadow-lg shadow-blue-500/25' 
+                                    : 'text-slate-300 hover:text-white hover:bg-slate-700/50 hover:shadow-lg hover:shadow-slate-900/20'
+                            ]"
+                            @click="handleNavClick">
+                            <div class="w-5 h-5 flex-shrink-0">
+                                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z"></path>
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"></path>
+                                </svg>
+                            </div>
+                            <span class="font-medium">Settings</span>
+                            <div v-if="$page.url.startsWith('/admin/settings')" class="absolute inset-y-0 left-0 w-1 bg-white rounded-r-full"></div>
+                        </InertiaLink>
+                    </nav>
+                    
+                    <!-- Sidebar Footer -->
+                    <div class="mt-8 pt-6 border-t border-slate-700/50">
+                        <InertiaLink href="/logout" method="post" as="button" 
+                            class="w-full flex items-center gap-3 px-4 py-3 rounded-xl text-slate-300 hover:text-white hover:bg-red-500/20 transition-all duration-200 group">
+                            <div class="w-5 h-5 flex-shrink-0">
+                                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1"></path>
+                                </svg>
+                            </div>
+                            <span class="font-medium">Logout</span>
+                        </InertiaLink>
+                    </div>
+                </div>
+            </aside>
+
+            <!-- Main Content -->
+            <main 
+                :class="[
+                    'flex-1 flex flex-col transition-all duration-300 ease-in-out',
+                    sidebarOpen ? 'lg:max-w-[calc(100%-320px)]' : 'lg:max-w-full'
+                ]"
+            >
+                <slot />
+            </main>
+        </div>
+    </div>
+</template>
+
+<style scoped></style>
