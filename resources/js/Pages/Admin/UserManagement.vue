@@ -1,6 +1,10 @@
 <script setup>
 import AdminLayout from '@/Layouts/AdminLayout.vue';
-import { Head } from '@inertiajs/vue3';
+import { Head, usePage } from '@inertiajs/vue3';
+import { computed } from 'vue';
+
+const page = usePage();
+const language = computed(() => page.props.language || {});
 
 // TODO: replace with backend-provided props later
 const users = [
@@ -12,8 +16,8 @@ const users = [
 </script>
 
 <template>
-  <AdminLayout title="User Management">
-    <Head title="User Management" />
+  <AdminLayout :title="language.user_management || 'User Management'">
+    <Head :title="language.user_management || 'User Management'" />
 
     <!-- Add New User Button -->
     <div class="flex justify-end mb-6">
@@ -21,7 +25,7 @@ const users = [
         <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
           <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6v6m0 0v6m0-6h6m-6 0H6"></path>
         </svg>
-        Add New User
+        {{ language.add_new || 'Add New' }} User
       </button>
     </div>
 
@@ -36,7 +40,7 @@ const users = [
             </svg>
           </div>
           <input
-            placeholder="Search users..."
+            :placeholder="(language.search || 'Search') + ' users...'"
             class="flex-1 rounded-r border-none bg-gray-100 px-3 sm:px-4 text-sm sm:text-base text-gray-900 placeholder-gray-500 focus:outline-none" />
         </div>
       </label>
@@ -45,13 +49,13 @@ const users = [
     <!-- Filters (placeholders) -->
     <div class="hidden sm:flex flex-wrap gap-3 p-3 pr-4">
       <button class="flex h-8 items-center gap-2 rounded bg-gray-100 px-4 text-sm font-medium text-gray-900 min-h-[44px] sm:min-h-[32px]">
-        Role
+        {{ language.role || 'Role' }}
         <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" fill="currentColor" viewBox="0 0 256 256">
           <path d="M213.66,101.66l-80,80a8,8,0,0,1-11.32,0l-80-80A8,8,0,0,1,53.66,90.34L128,164.69l74.34-74.35a8,8,0,0,1,11.32,11.32Z" />
         </svg>
       </button>
       <button class="flex h-8 items-center gap-2 rounded bg-gray-100 px-4 text-sm font-medium text-gray-900 min-h-[44px] sm:min-h-[32px]">
-        Status
+        {{ language.status || 'Status' }}
         <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" fill="currentColor" viewBox="0 0 256 256">
           <path d="M213.66,101.66l-80,80a8,8,0,0,1-11.32,0l-80-80A8,8,0,0,1,53.66,90.34L128,164.69l74.34-74.35a8,8,0,0,1,11.32,11.32Z" />
         </svg>
@@ -70,11 +74,11 @@ const users = [
         <table class="w-full text-sm">
           <thead>
             <tr class="bg-white text-left text-gray-900">
-              <th class="px-4 py-3 w-1/4 font-medium">Name</th>
-              <th class="px-4 py-3 w-1/4 font-medium">Role</th>
-              <th class="px-4 py-3 w-1/3 font-medium">Email</th>
-              <th class="px-4 py-3 w-28 font-medium">Status</th>
-              <th class="px-4 py-3 w-28 font-medium text-gray-500">Actions</th>
+              <th class="px-4 py-3 w-1/4 font-medium">{{ language.name || 'Name' }}</th>
+              <th class="px-4 py-3 w-1/4 font-medium">{{ language.role || 'Role' }}</th>
+              <th class="px-4 py-3 w-1/3 font-medium">{{ language.email || 'Email' }}</th>
+              <th class="px-4 py-3 w-28 font-medium">{{ language.status || 'Status' }}</th>
+              <th class="px-4 py-3 w-28 font-medium text-gray-500">{{ language.actions || 'Actions' }}</th>
             </tr>
           </thead>
           <tbody>
@@ -90,7 +94,7 @@ const users = [
                   {{ u.status }}
                 </span>
               </td>
-              <td class="px-4 py-2 text-primary-600 font-bold cursor-pointer">Edit</td>
+              <td class="px-4 py-2 text-primary-600 font-bold cursor-pointer">{{ language.edit || 'Edit' }}</td>
             </tr>
           </tbody>
         </table>
@@ -117,7 +121,7 @@ const users = [
         </div>
         <div class="flex justify-end">
           <button class="text-primary-600 font-semibold text-sm min-h-[44px] px-4 py-2 rounded hover:bg-primary-50 transition-colors">
-            Edit
+            {{ language.edit || 'Edit' }}
           </button>
         </div>
       </div>
@@ -126,7 +130,7 @@ const users = [
     <!-- Footer actions -->
     <div class="flex justify-end px-3 sm:px-4 py-3">
       <button class="h-11 sm:h-10 rounded bg-primary-600 px-4 sm:px-4 text-sm font-bold text-white min-w-[120px] min-h-[44px] sm:min-h-[40px]">
-        Add New User
+        {{ language.add_new || 'Add New' }} User
       </button>
     </div>
   </AdminLayout>

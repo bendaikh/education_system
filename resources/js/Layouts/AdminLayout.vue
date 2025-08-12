@@ -1,6 +1,6 @@
 <script setup>
 import { computed, ref, onMounted } from 'vue';
-import { Link as InertiaLink, usePage } from '@inertiajs/vue3';
+import { Link as InertiaLink, usePage, router } from '@inertiajs/vue3';
 
 const props = defineProps({
     title: { type: String, default: '' },
@@ -8,6 +8,27 @@ const props = defineProps({
 
 const page = usePage();
 const isAuthenticated = computed(() => !!page.props.auth?.user);
+
+// Language switching
+const currentLocale = ref(page.props.locale || 'en');
+
+const switchLanguage = (locale) => {
+    currentLocale.value = locale;
+    localStorage.setItem('locale', locale);
+    
+    // Use Inertia router to send POST request
+    router.post(`/language/${locale}`, {}, {
+        preserveState: true,
+        preserveScroll: true,
+        onSuccess: () => {
+            // Language switched successfully
+            console.log('Language switched to:', locale);
+        },
+        onError: (errors) => {
+            console.error('Error switching language:', errors);
+        }
+    });
+};
 
 // Sidebar state - open by default on desktop, closed on mobile
 const sidebarOpen = ref(false);
@@ -45,15 +66,18 @@ const handleNavClick = () => {
     }
 };
 
-const navItems = [
-    { label: 'Dashboard', href: '/admin/dashboard' },
-    { label: 'Classes', href: '/admin/classes' },
-    { label: 'Students', href: '/admin/students' },
-    { label: 'Teachers', href: '/admin/teachers' },
-    { label: 'Admins', href: '/admin/admins' },
-    { label: 'Payments', href: '/admin/payments' },
-    { label: 'Subscriptions', href: '/admin/subscriptions' },
-];
+const navItems = computed(() => {
+    const language = page.props.language || {};
+    return [
+        { label: language.dashboard || 'Dashboard', href: '/admin/dashboard' },
+        { label: language.classes || 'Classes', href: '/admin/classes' },
+        { label: language.students || 'Students', href: '/admin/students' },
+        { label: language.teachers || 'Teachers', href: '/admin/teachers' },
+        { label: language.admins || 'Admins', href: '/admin/admins' },
+        { label: language.payments || 'Payments', href: '/admin/payments' },
+        { label: language.subscriptions || 'Subscriptions', href: '/admin/subscriptions' },
+    ];
+});
 </script>
 
 <template>
@@ -85,6 +109,16 @@ const navItems = [
                             d="M221.8,175.94C216.25,166.38,208,139.33,208,104a80,80,0,1,0-160,0c0,35.34-8.26,62.38-13.81,71.94A16,16,0,0,0,48,200H88.81a40,40,0,0,0,78.38,0H208a16,16,0,0,0,13.8-24.06ZM128,216a24,24,0,0,1-22.62-16h45.24A24,24,0,0,1,128,216ZM48,184c7.7-13.24,16-43.92,16-80a64,64,0,1,1,128,0c0,36.05,8.28,66.73,16,80Z" />
                     </svg>
                 </button>
+                <!-- Language Switcher -->
+                <div class="flex items-center gap-3 mr-4">
+                    <button @click="switchLanguage('en')" :class="['min-w-[32px] min-h-[32px] rounded-lg flex items-center justify-center transition-colors', currentLocale === 'en' ? 'bg-blue-100 text-blue-600' : 'hover:bg-gray-100']">
+                        <span class="text-sm font-medium">EN</span>
+                    </button>
+                    <button @click="switchLanguage('fr')" :class="['min-w-[32px] min-h-[32px] rounded-lg flex items-center justify-center transition-colors', currentLocale === 'fr' ? 'bg-blue-100 text-blue-600' : 'hover:bg-gray-100']">
+                        <span class="text-sm font-medium">FR</span>
+                    </button>
+                </div>
+
                 <!-- User Info and Avatar -->
                 <div class="flex items-center gap-1 sm:gap-3">
                     <div class="text-right hidden sm:block">
@@ -96,7 +130,7 @@ const navItems = [
                     </div>
                     <InertiaLink href="/logout" method="post" as="button" 
                         class="ml-1 sm:ml-2 text-xs sm:text-sm text-gray-500 hover:text-gray-700 min-w-[44px] min-h-[44px] flex items-center justify-center">
-                        <span class="hidden sm:inline">Logout</span>
+                        <span class="hidden sm:inline">{{ (page.props.language && page.props.language.logout) || 'Logout' }}</span>
                         <svg class="sm:hidden w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1"></path>
                         </svg>
@@ -142,60 +176,60 @@ const navItems = [
                                     : 'text-slate-300 hover:text-white hover:bg-slate-700/50 hover:shadow-lg hover:shadow-slate-900/20'
                             ]"
                             @click="handleNavClick">
-                            <!-- Icon for each nav item -->
-                            <div class="w-5 h-5 flex-shrink-0">
-                                <!-- Dashboard Icon -->
-                                <svg v-if="item.label === 'Dashboard'" class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                   <!-- Icon for each nav item -->
+                       <div class="w-5 h-5 flex-shrink-0">
+                           <!-- Dashboard Icon -->
+                           <svg v-if="item.href === '/admin/dashboard'" class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 7v10a2 2 0 002 2h14a2 2 0 002-2V9a2 2 0 00-2-2H5a2 2 0 00-2-2z"></path>
                                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 5a2 2 0 012-2h4a2 2 0 012 2v6a2 2 0 01-2 2H10a2 2 0 01-2-2V5z"></path>
                                 </svg>
-                                <!-- Classes Icon -->
-                                <svg v-else-if="item.label === 'Classes'" class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18.477 18.246 18 16.5 18c-1.746 0-3.332.477-4.5 1.253"></path>
-                                </svg>
-                                <!-- Students Icon -->
-                                <svg v-else-if="item.label === 'Students'" class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197m13.5-9a2.5 2.5 0 11-5 0 2.5 2.5 0 015 0z"></path>
-                                </svg>
-                                <!-- Teachers Icon -->
-                                <svg v-else-if="item.label === 'Teachers'" class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"></path>
-                                </svg>
-                                <!-- Admins Icon -->
-                                <svg v-else-if="item.label === 'Admins'" class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.031 9-11.622 0-1.042-.133-2.052-.382-3.016z"></path>
-                                </svg>
-                                <!-- Payments Icon -->
-                                <svg v-else-if="item.label === 'Payments'" class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 9V7a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2m2 4h10a2 2 0 002-2v-6a2 2 0 00-2-2H9a2 2 0 00-2 2v6a2 2 0 002 2zm7-5a2 2 0 11-4 0 2 2 0 014 0z"></path>
-                                </svg>
-                                <!-- Subscriptions Icon -->
-                                <svg v-else-if="item.label === 'Subscriptions'" class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v10a2 2 0 002 2h8a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-3 7h3m-3 4h3m-6-4h.01M9 16h.01"></path>
-                                </svg>
+                                                           <!-- Classes Icon -->
+                           <svg v-else-if="item.href === '/admin/classes'" class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                               <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18.477 18.246 18 16.5 18c-1.746 0-3.332.477-4.5 1.253"></path>
+                           </svg>
+                           <!-- Students Icon -->
+                           <svg v-else-if="item.href === '/admin/students'" class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                               <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197m13.5-9a2.5 2.5 0 11-5 0 2.5 2.5 0 015 0z"></path>
+                           </svg>
+                           <!-- Teachers Icon -->
+                           <svg v-else-if="item.href === '/admin/teachers'" class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                               <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"></path>
+                           </svg>
+                           <!-- Admins Icon -->
+                           <svg v-else-if="item.href === '/admin/admins'" class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                               <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.031 9-11.622 0-1.042-.133-2.052-.382-3.016z"></path>
+                           </svg>
+                           <!-- Payments Icon -->
+                           <svg v-else-if="item.href === '/admin/payments'" class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                               <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 9V7a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2m2 4h10a2 2 0 002-2v-6a2 2 0 00-2-2H9a2 2 0 00-2 2v6a2 2 0 002 2zm7-5a2 2 0 11-4 0 2 2 0 014 0z"></path>
+                           </svg>
+                           <!-- Subscriptions Icon -->
+                           <svg v-else-if="item.href === '/admin/subscriptions'" class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                               <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v10a2 2 0 002 2h8a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-3 7h3m-3 4h3m-6-4h.01M9 16h.01"></path>
+                           </svg>
                             </div>
                             <span class="font-medium">{{ item.label }}</span>
                             <!-- Active indicator -->
                             <div v-if="$page.url.startsWith(item.href)" class="absolute inset-y-0 left-0 w-1 bg-white rounded-r-full"></div>
                         </InertiaLink>
                         
-                        <!-- User Management -->
-                        <InertiaLink href="/admin/user-management"
-                            :class="[
-                                'nav-item-glow group flex items-center gap-3 px-4 py-3 rounded-xl transition-all duration-200 min-h-[44px] relative overflow-hidden',
-                                $page.url.startsWith('/admin/user-management') 
-                                    ? 'bg-gradient-to-r from-blue-500 to-purple-600 text-white shadow-lg shadow-blue-500/25' 
-                                    : 'text-slate-300 hover:text-white hover:bg-slate-700/50 hover:shadow-lg hover:shadow-slate-900/20'
-                            ]"
-                            @click="handleNavClick">
-                            <div class="w-5 h-5 flex-shrink-0">
-                                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197m13.5-9a2.5 2.5 0 11-5 0 2.5 2.5 0 015 0z"></path>
-                                </svg>
-                            </div>
-                            <span class="font-medium">User Management</span>
-                            <div v-if="$page.url.startsWith('/admin/user-management')" class="absolute inset-y-0 left-0 w-1 bg-white rounded-r-full"></div>
-                        </InertiaLink>
+                                           <!-- User Management -->
+                   <InertiaLink href="/admin/user-management"
+                       :class="[
+                           'nav-item-glow group flex items-center gap-3 px-4 py-3 rounded-xl transition-all duration-200 min-h-[44px] relative overflow-hidden',
+                           $page.url.startsWith('/admin/user-management') 
+                               ? 'bg-gradient-to-r from-blue-500 to-purple-600 text-white shadow-lg shadow-blue-500/25' 
+                               : 'text-slate-300 hover:text-white hover:bg-slate-700/50 hover:shadow-lg hover:shadow-slate-900/20'
+                       ]"
+                       @click="handleNavClick">
+                       <div class="w-5 h-5 flex-shrink-0">
+                           <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                               <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197m13.5-9a2.5 2.5 0 11-5 0 2.5 2.5 0 015 0z"></path>
+                           </svg>
+                       </div>
+                       <span class="font-medium">{{ (page.props.language && page.props.language.user_management) || 'User Management' }}</span>
+                       <div v-if="$page.url.startsWith('/admin/user-management')" class="absolute inset-y-0 left-0 w-1 bg-white rounded-r-full"></div>
+                   </InertiaLink>
                         
                         <!-- Settings -->
                         <InertiaLink href="/admin/settings"
@@ -212,7 +246,7 @@ const navItems = [
                                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"></path>
                                 </svg>
                             </div>
-                            <span class="font-medium">Settings</span>
+                            <span class="font-medium">{{ (page.props.language && page.props.language.settings) || 'Settings' }}</span>
                             <div v-if="$page.url.startsWith('/admin/settings')" class="absolute inset-y-0 left-0 w-1 bg-white rounded-r-full"></div>
                         </InertiaLink>
                     </nav>

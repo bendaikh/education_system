@@ -7,12 +7,16 @@ use App\Http\Controllers\StudentController;
 use App\Http\Controllers\TeacherController;
 use App\Http\Controllers\PaymentController;
 use App\Http\Controllers\SubscriptionController;
+use App\Http\Controllers\LanguageController;
 use Illuminate\Foundation\Application;
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\HomeController;
 use Inertia\Inertia;
 
 Route::get('/', HomeController::class);
+
+// Language Switch Route
+Route::post('/language/{locale}', [LanguageController::class, 'switch'])->name('language.switch');
 
 // Override dashboard for superadmins
 Route::get('/dashboard', function () {
