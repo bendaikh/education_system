@@ -51,6 +51,8 @@ const navItems = [
     { label: 'Students', href: '/admin/students' },
     { label: 'Teachers', href: '/admin/teachers' },
     { label: 'Admins', href: '/admin/admins' },
+    { label: 'Payments', href: '/admin/payments' },
+    { label: 'Subscriptions', href: '/admin/subscriptions' },
 ];
 </script>
 
@@ -103,7 +105,7 @@ const navItems = [
             </div>
         </header>
 
-        <div class="flex flex-1 gap-1 py-2 sm:py-5 px-2 sm:px-6 relative">
+        <div class="flex flex-1 relative">
             <!-- Mobile Overlay -->
             <div 
                 v-if="sidebarOpen" 
@@ -127,37 +129,11 @@ const navItems = [
                     sidebarOpen ? 'lg:w-80' : 'lg:w-0 lg:overflow-hidden'
                 ]"
             >
-                <div class="flex h-full min-h-[700px] flex-col p-4 sm:p-6">
-                    <!-- Sidebar Header -->
-                    <div class="mb-8">
-                        <div class="flex items-center gap-3 mb-6">
-                            <div class="w-10 h-10 bg-gradient-to-br from-blue-400 to-purple-600 rounded-xl flex items-center justify-center shadow-lg">
-                                <svg viewBox="0 0 48 48" class="h-6 w-6 text-white" fill="currentColor" xmlns="http://www.w3.org/2000/svg">
-                                    <path d="M42.4379 44C42.4379 44 36.0744 33.9038 41.1692 24C46.8624 12.9336 42.2078 4 42.2078 4L7.01134 4C7.01134 4 11.6577 12.932 5.96912 23.9969C0.876273 33.9029 7.27094 44 7.27094 44L42.4379 44Z" />
-                                </svg>
-                            </div>
-                            <div>
-                                <h1 class="text-lg font-bold text-white">School Admin</h1>
-                                <p class="text-xs text-slate-300">Management Portal</p>
-                            </div>
-                        </div>
-                        
-                        <!-- User Profile in Sidebar -->
-                        <div class="bg-slate-800/50 rounded-xl p-4 border border-slate-700/50 backdrop-blur-sm">
-                            <div class="flex items-center gap-3">
-                                <div class="w-10 h-10 bg-gradient-to-br from-emerald-400 to-blue-500 rounded-full flex items-center justify-center text-white font-semibold text-sm shadow-lg">
-                                    {{ page.props.auth?.user?.name?.charAt(0)?.toUpperCase() || 'A' }}
-                                </div>
-                                <div class="flex-1 min-w-0">
-                                    <p class="text-sm font-medium text-white truncate">{{ page.props.auth?.user?.name }}</p>
-                                    <p class="text-xs text-slate-300 capitalize">{{ page.props.auth?.user?.role }}</p>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
+                <div class="flex h-full min-h-screen flex-col p-4 sm:p-6">
+
 
                     <!-- Navigation -->
-                    <nav class="flex-1 space-y-2">
+                    <nav class="flex-1 space-y-2 pt-4">
                         <InertiaLink v-for="item in navItems" :key="'side-'+item.href" :href="item.href"
                             :class="[
                                 'nav-item-glow group flex items-center gap-3 px-4 py-3 rounded-xl transition-all duration-200 min-h-[44px] relative overflow-hidden',
@@ -188,6 +164,14 @@ const navItems = [
                                 <!-- Admins Icon -->
                                 <svg v-else-if="item.label === 'Admins'" class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.031 9-11.622 0-1.042-.133-2.052-.382-3.016z"></path>
+                                </svg>
+                                <!-- Payments Icon -->
+                                <svg v-else-if="item.label === 'Payments'" class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 9V7a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2m2 4h10a2 2 0 002-2v-6a2 2 0 00-2-2H9a2 2 0 00-2 2v6a2 2 0 002 2zm7-5a2 2 0 11-4 0 2 2 0 014 0z"></path>
+                                </svg>
+                                <!-- Subscriptions Icon -->
+                                <svg v-else-if="item.label === 'Subscriptions'" class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v10a2 2 0 002 2h8a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-3 7h3m-3 4h3m-6-4h.01M9 16h.01"></path>
                                 </svg>
                             </div>
                             <span class="font-medium">{{ item.label }}</span>
@@ -251,7 +235,7 @@ const navItems = [
             <!-- Main Content -->
             <main 
                 :class="[
-                    'flex-1 flex flex-col transition-all duration-300 ease-in-out',
+                    'flex-1 flex flex-col transition-all duration-300 ease-in-out p-4 sm:p-6',
                     sidebarOpen ? 'lg:max-w-[calc(100%-320px)]' : 'lg:max-w-full'
                 ]"
             >

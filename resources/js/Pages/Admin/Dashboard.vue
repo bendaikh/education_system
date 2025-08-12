@@ -49,11 +49,7 @@ const statsCards = [
   <AdminLayout title="Dashboard">
     <Head title="Dashboard" />
 
-    <!-- Dashboard Header -->
-    <div class="mb-8">
-      <h1 class="text-2xl sm:text-3xl font-bold text-gray-900 mb-2">Dashboard</h1>
-      <p class="text-sm sm:text-base text-gray-600">Welcome to your school management dashboard.</p>
-    </div>
+
 
     <!-- Statistics Cards -->
     <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 sm:gap-6 mb-8">

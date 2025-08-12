@@ -5,51 +5,51 @@ import { ref } from 'vue';
 
 // Accept props from backend
 const props = defineProps({
-  students: Array,
+  teachers: Array,
   total: Number
 });
 
 // Use data from props or fallback to mock data
-const students = ref(props.students || [
+const teachers = ref(props.teachers || [
   {
     id: 1,
-    name: 'Liam Smith',
-    student_id: '#ST5A28',
-    grade: 'Grade 5 - Section A',
-    contact_parent: '+1234567890'
+    name: 'Mr. Owen Carter',
+    department: 'Science',
+    classes_assigned: 3,
+    contact: 'owen.carter@example.com'
   },
   {
     id: 2,
-    name: 'Olivia Johnson',
-    student_id: '#STP101',
-    grade: 'Physics 101',
-    contact_parent: '+1987654321'
+    name: 'Ms. Clara Bennett',
+    department: 'Physics',
+    classes_assigned: 2,
+    contact: 'clara.bennett@example.com'
   },
   {
     id: 3,
-    name: 'Noah Williams',
-    student_id: '#STH832',
-    grade: 'History - Grade 8',
-    contact_parent: '+1122334455'
+    name: 'Dr. Emma Foster',
+    department: 'History',
+    classes_assigned: 4,
+    contact: 'emma.foster@example.com'
   },
   {
     id: 4,
-    name: 'Emma Brown',
-    student_id: '#STAC25',
-    grade: 'Art & Craft',
-    contact_parent: '+1554433221'
+    name: 'Ms. Sophia Hayes',
+    department: 'Arts',
+    classes_assigned: 1,
+    contact: 'sophia.hayes@example.com'
   }
 ]);
 
 const searchQuery = ref('');
 const currentPage = ref(1);
-const totalStudents = ref(props.total || 1200);
-const studentsPerPage = ref(4);
+const totalTeachers = ref(props.total || 20);
+const teachersPerPage = ref(4);
 
 // Pagination
-const totalPages = Math.ceil(totalStudents.value / studentsPerPage.value);
-const startIndex = (currentPage.value - 1) * studentsPerPage.value + 1;
-const endIndex = Math.min(currentPage.value * studentsPerPage.value, totalStudents.value);
+const totalPages = Math.ceil(totalTeachers.value / teachersPerPage.value);
+const startIndex = (currentPage.value - 1) * teachersPerPage.value + 1;
+const endIndex = Math.min(currentPage.value * teachersPerPage.value, totalTeachers.value);
 
 const goToPage = (page) => {
   if (page >= 1 && page <= totalPages) {
@@ -71,16 +71,16 @@ const nextPage = () => {
 </script>
 
 <template>
-  <AdminLayout title="Students">
-    <Head title="Students" />
+  <AdminLayout title="Teachers">
+    <Head title="Teachers" />
 
-    <!-- Add New Student Button -->
+    <!-- Add New Teacher Button -->
     <div class="flex justify-end mb-6">
       <button class="inline-flex items-center gap-2 bg-gradient-to-r from-blue-500 to-purple-600 text-white px-4 py-2 rounded-xl font-medium hover:from-blue-600 hover:to-purple-700 transition-all duration-200 shadow-lg hover:shadow-xl min-h-[44px]">
         <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
           <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6v6m0 0v6m0-6h6m-6 0H6"></path>
         </svg>
-        Add New Student
+        Add New Teacher
       </button>
     </div>
 
@@ -96,7 +96,7 @@ const nextPage = () => {
             <input
               v-model="searchQuery"
               type="text"
-              placeholder="Search students..."
+              placeholder="Search teachers..."
               class="w-full pl-10 pr-4 py-3 border border-gray-200 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all duration-200"
             />
           </div>
@@ -120,33 +120,33 @@ const nextPage = () => {
       </div>
     </div>
 
-    <!-- Students Table -->
+    <!-- Teachers Table -->
     <div class="bg-white rounded-xl shadow-sm border border-gray-100 overflow-hidden">
       <!-- Desktop Table View -->
       <div class="hidden md:block overflow-x-auto">
         <table class="w-full">
           <thead class="bg-gray-50 border-b border-gray-100">
             <tr>
-              <th class="text-left py-4 px-6 text-xs font-medium text-gray-500 uppercase tracking-wider">Student Name</th>
-              <th class="text-left py-4 px-6 text-xs font-medium text-gray-500 uppercase tracking-wider">Student ID</th>
-              <th class="text-left py-4 px-6 text-xs font-medium text-gray-500 uppercase tracking-wider">Grade</th>
-              <th class="text-left py-4 px-6 text-xs font-medium text-gray-500 uppercase tracking-wider">Contact Parent</th>
+              <th class="text-left py-4 px-6 text-xs font-medium text-gray-500 uppercase tracking-wider">Teacher Name</th>
+              <th class="text-left py-4 px-6 text-xs font-medium text-gray-500 uppercase tracking-wider">Department</th>
+              <th class="text-left py-4 px-6 text-xs font-medium text-gray-500 uppercase tracking-wider">Classes Assigned</th>
+              <th class="text-left py-4 px-6 text-xs font-medium text-gray-500 uppercase tracking-wider">Contact</th>
               <th class="text-left py-4 px-6 text-xs font-medium text-gray-500 uppercase tracking-wider">Actions</th>
             </tr>
           </thead>
           <tbody class="divide-y divide-gray-100">
-            <tr v-for="student in students" :key="student.id" class="hover:bg-gray-50 transition-colors duration-150">
+            <tr v-for="teacher in teachers" :key="teacher.id" class="hover:bg-gray-50 transition-colors duration-150">
               <td class="py-4 px-6">
-                <div class="text-sm font-medium text-gray-900">{{ student.name }}</div>
+                <div class="text-sm font-medium text-gray-900">{{ teacher.name }}</div>
               </td>
               <td class="py-4 px-6">
-                <div class="text-sm text-gray-600 font-mono">{{ student.student_id }}</div>
+                <div class="text-sm text-gray-600">{{ teacher.department }}</div>
               </td>
               <td class="py-4 px-6">
-                <div class="text-sm text-gray-600">{{ student.grade }}</div>
+                <div class="text-sm text-gray-600 font-semibold">{{ teacher.classes_assigned }}</div>
               </td>
               <td class="py-4 px-6">
-                <div class="text-sm text-gray-600 font-mono">{{ student.contact_parent }}</div>
+                <div class="text-sm text-gray-600">{{ teacher.contact }}</div>
               </td>
               <td class="py-4 px-6">
                 <div class="flex items-center gap-3">
@@ -171,11 +171,11 @@ const nextPage = () => {
 
       <!-- Mobile Card View -->
       <div class="md:hidden divide-y divide-gray-100">
-        <div v-for="student in students" :key="student.id" class="p-4 sm:p-6">
+        <div v-for="teacher in teachers" :key="teacher.id" class="p-4 sm:p-6">
           <div class="flex items-start justify-between mb-3">
             <div class="flex-1 min-w-0">
-              <h3 class="text-base font-medium text-gray-900 truncate">{{ student.name }}</h3>
-              <p class="text-sm text-gray-600 mt-1 font-mono">{{ student.student_id }}</p>
+              <h3 class="text-base font-medium text-gray-900 truncate">{{ teacher.name }}</h3>
+              <p class="text-sm text-gray-600 mt-1">{{ teacher.department }}</p>
             </div>
             <div class="flex items-center gap-2 ml-3">
               <!-- Edit Button -->
@@ -194,12 +194,12 @@ const nextPage = () => {
           </div>
           <div class="grid grid-cols-1 gap-2 text-sm">
             <div>
-              <span class="text-gray-500">Grade:</span>
-              <span class="ml-1 text-gray-900">{{ student.grade }}</span>
+              <span class="text-gray-500">Classes Assigned:</span>
+              <span class="ml-1 text-gray-900 font-semibold">{{ teacher.classes_assigned }}</span>
             </div>
             <div>
-              <span class="text-gray-500">Parent Contact:</span>
-              <span class="ml-1 text-gray-900 font-mono">{{ student.contact_parent }}</span>
+              <span class="text-gray-500">Contact:</span>
+              <span class="ml-1 text-gray-900">{{ teacher.contact }}</span>
             </div>
           </div>
         </div>
@@ -209,7 +209,7 @@ const nextPage = () => {
       <div class="px-4 sm:px-6 py-4 border-t border-gray-100 bg-gray-50">
         <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
           <div class="text-sm text-gray-700">
-            Showing <span class="font-medium">{{ startIndex }}</span> to <span class="font-medium">{{ endIndex }}</span> of <span class="font-medium">{{ totalStudents }}</span> Students
+            Showing <span class="font-medium">{{ startIndex }}</span> to <span class="font-medium">{{ endIndex }}</span> of <span class="font-medium">{{ totalTeachers }}</span> Teachers
           </div>
           
           <div class="flex items-center justify-center sm:justify-end">

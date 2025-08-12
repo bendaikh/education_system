@@ -15,12 +15,14 @@ const users = [
   <AdminLayout title="User Management">
     <Head title="User Management" />
 
-    <!-- Header -->
-    <div class="flex flex-wrap justify-between gap-3 p-3 sm:p-4">
-      <div class="flex min-w-0 flex-1 flex-col gap-2 sm:gap-3">
-        <p class="text-xl sm:text-2xl lg:text-3xl font-bold text-gray-900">User Management</p>
-        <p class="text-xs sm:text-sm text-gray-500">Manage all user accounts within the school system.</p>
-      </div>
+    <!-- Add New User Button -->
+    <div class="flex justify-end mb-6">
+      <button class="inline-flex items-center gap-2 bg-gradient-to-r from-blue-500 to-purple-600 text-white px-4 py-2 rounded-xl font-medium hover:from-blue-600 hover:to-purple-700 transition-all duration-200 shadow-lg hover:shadow-xl min-h-[44px]">
+        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6v6m0 0v6m0-6h6m-6 0H6"></path>
+        </svg>
+        Add New User
+      </button>
     </div>
 
     <!-- Search -->
