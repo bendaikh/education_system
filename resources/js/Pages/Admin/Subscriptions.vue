@@ -1,7 +1,10 @@
 <script setup>
 import AdminLayout from '@/Layouts/AdminLayout.vue';
-import { Head } from '@inertiajs/vue3';
-import { ref } from 'vue';
+import { Head, usePage } from '@inertiajs/vue3';
+import { ref, computed } from 'vue';
+
+const page = usePage();
+const language = computed(() => page.props.language || {});
 
 // Accept props from backend
 const props = defineProps({
@@ -58,8 +61,8 @@ const getStatusClass = (status) => {
 </script>
 
 <template>
-  <AdminLayout title="Subscriptions">
-    <Head title="Subscriptions" />
+  <AdminLayout :title="language.subscriptions || 'Subscriptions'">
+    <Head :title="language.subscriptions || 'Subscriptions'" />
 
     <!-- Add New Subscription Button -->
     <div class="flex justify-end mb-6">
@@ -67,7 +70,7 @@ const getStatusClass = (status) => {
         <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
           <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6v6m0 0v6m0-6h6m-6 0H6"></path>
         </svg>
-        Add New Subscription
+        {{ language.add_new || 'Add New' }} {{ language.subscriptions || 'Subscription' }}
       </button>
     </div>
 
@@ -83,7 +86,7 @@ const getStatusClass = (status) => {
             <input
               v-model="searchQuery"
               type="text"
-              placeholder="Search subscriptions..."
+              :placeholder="(language.search || 'Search') + ' ' + (language.subscriptions || 'subscriptions') + '...'"
               class="w-full pl-10 pr-4 py-3 border border-gray-200 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all duration-200"
             />
           </div>
@@ -95,13 +98,13 @@ const getStatusClass = (status) => {
             <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 4a1 1 0 011-1h16a1 1 0 011 1v2.586a1 1 0 01-.293.707l-6.414 6.414a1 1 0 00-.293.707V17l-4 4v-6.586a1 1 0 00-.293-.707L3.293 7.707A1 1 0 013 7V4z"></path>
             </svg>
-            Filter
+            {{ language.filter || 'Filter' }}
           </button>
           <button class="inline-flex items-center gap-2 px-4 py-3 border border-gray-200 rounded-lg text-gray-700 hover:bg-gray-50 transition-colors duration-200 min-h-[44px]">
             <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 16V4m0 0L3 8m4-4l4 4m6 0v12m0 0l4-4m-4 4l-4-4"></path>
             </svg>
-            Sort
+            {{ language.sort || 'Sort' }}
           </button>
         </div>
       </div>
@@ -114,12 +117,12 @@ const getStatusClass = (status) => {
         <table class="w-full">
           <thead class="bg-gray-50 border-b border-gray-100">
             <tr>
-              <th class="text-left py-4 px-6 text-xs font-medium text-gray-500 uppercase tracking-wider">Plan Name</th>
-              <th class="text-left py-4 px-6 text-xs font-medium text-gray-500 uppercase tracking-wider">Subscriber</th>
-              <th class="text-left py-4 px-6 text-xs font-medium text-gray-500 uppercase tracking-wider">Price</th>
-              <th class="text-left py-4 px-6 text-xs font-medium text-gray-500 uppercase tracking-wider">Status</th>
-              <th class="text-left py-4 px-6 text-xs font-medium text-gray-500 uppercase tracking-wider">Next Billing</th>
-              <th class="text-left py-4 px-6 text-xs font-medium text-gray-500 uppercase tracking-wider">Actions</th>
+              <th class="text-left py-4 px-6 text-xs font-medium text-gray-500 uppercase tracking-wider">{{ language.plan_name || 'Plan Name' }}</th>
+              <th class="text-left py-4 px-6 text-xs font-medium text-gray-500 uppercase tracking-wider">{{ language.subscriber || 'Subscriber' }}</th>
+              <th class="text-left py-4 px-6 text-xs font-medium text-gray-500 uppercase tracking-wider">{{ language.price || 'Price' }}</th>
+              <th class="text-left py-4 px-6 text-xs font-medium text-gray-500 uppercase tracking-wider">{{ language.status || 'Status' }}</th>
+              <th class="text-left py-4 px-6 text-xs font-medium text-gray-500 uppercase tracking-wider">{{ language.next_billing || 'Next Billing' }}</th>
+              <th class="text-left py-4 px-6 text-xs font-medium text-gray-500 uppercase tracking-wider">{{ language.actions || 'Actions' }}</th>
             </tr>
           </thead>
           <tbody class="divide-y divide-gray-100">
@@ -184,15 +187,15 @@ const getStatusClass = (status) => {
           </div>
           <div class="grid grid-cols-1 gap-2 text-sm mb-4">
             <div>
-              <span class="text-gray-500">Price:</span>
+              <span class="text-gray-500">{{ (language.price || 'Price') + ':' }}</span>
               <span class="ml-1 text-gray-900 font-semibold">{{ subscription.price }}</span>
             </div>
             <div>
-              <span class="text-gray-500">Next Billing:</span>
+              <span class="text-gray-500">{{ (language.next_billing || 'Next Billing') + ':' }}</span>
               <span class="ml-1 text-gray-900">{{ subscription.next_billing }}</span>
             </div>
             <div>
-              <span class="text-gray-500">Features:</span>
+              <span class="text-gray-500">{{ (language.features || 'Features') + ':' }}</span>
               <span class="ml-1 text-gray-900">{{ subscription.features }}</span>
             </div>
           </div>
@@ -224,7 +227,7 @@ const getStatusClass = (status) => {
       <div class="px-4 sm:px-6 py-4 border-t border-gray-100 bg-gray-50">
         <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
           <div class="text-sm text-gray-700">
-            Showing <span class="font-medium">{{ startIndex }}</span> to <span class="font-medium">{{ endIndex }}</span> of <span class="font-medium">{{ totalSubscriptions }}</span> Subscriptions
+            Showing <span class="font-medium">{{ startIndex }}</span> to <span class="font-medium">{{ endIndex }}</span> of <span class="font-medium">{{ totalSubscriptions }}</span> {{ language.subscriptions || 'Subscriptions' }}
           </div>
           
           <div class="flex items-center justify-center sm:justify-end">

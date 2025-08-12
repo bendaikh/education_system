@@ -1,6 +1,10 @@
 <script setup>
 import AdminLayout from '@/Layouts/AdminLayout.vue';
-import { Head } from '@inertiajs/vue3';
+import { Head, usePage } from '@inertiajs/vue3';
+import { computed } from 'vue';
+
+const page = usePage();
+const language = computed(() => page.props.language || {});
 
 // Accept props from backend
 const props = defineProps({
@@ -9,9 +13,9 @@ const props = defineProps({
 });
 
 // Transform stats data for display
-const statsCards = [
+const statsCards = computed(() => [
   {
-    title: 'Total Students',
+    title: language.value.students || 'Total Students',
     value: props.stats?.totalStudents?.toLocaleString() || '1,250',
     icon: 'students',
     color: 'blue',
@@ -19,7 +23,7 @@ const statsCards = [
     iconColor: 'text-blue-600'
   },
   {
-    title: 'Total Teachers',
+    title: language.value.teachers || 'Total Teachers',
     value: props.stats?.totalTeachers?.toString() || '75',
     icon: 'teachers',
     color: 'green',
@@ -27,7 +31,7 @@ const statsCards = [
     iconColor: 'text-green-600'
   },
   {
-    title: 'Total Classes',
+    title: language.value.classes || 'Total Classes',
     value: props.stats?.totalClasses?.toString() || '50',
     icon: 'classes',
     color: 'yellow',
@@ -42,12 +46,12 @@ const statsCards = [
     bgColor: 'bg-red-50',
     iconColor: 'text-red-600'
   }
-];
+]);
 </script>
 
 <template>
-  <AdminLayout title="Dashboard">
-    <Head title="Dashboard" />
+  <AdminLayout :title="language.dashboard || 'Dashboard'">
+    <Head :title="language.dashboard || 'Dashboard'" />
 
 
 
@@ -85,7 +89,7 @@ const statsCards = [
     <!-- Recent Activity Section -->
     <div class="bg-white rounded-xl shadow-sm border border-gray-100">
       <div class="px-6 py-4 border-b border-gray-100">
-        <h2 class="text-lg font-semibold text-gray-900">Recent Activity</h2>
+        <h2 class="text-lg font-semibold text-gray-900">{{ language.recent_activity || 'Recent Activity' }}</h2>
       </div>
 
       <!-- Desktop Table View -->
