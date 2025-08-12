@@ -74,12 +74,8 @@ const nextPage = () => {
   <AdminLayout title="Classes">
     <Head title="Classes" />
 
-    <!-- Classes Header -->
-    <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 mb-6">
-      <div>
-        <h1 class="text-2xl sm:text-3xl font-bold text-gray-900 mb-2">Classes</h1>
-        <p class="text-sm sm:text-base text-gray-600">Manage your school's classes.</p>
-      </div>
+    <!-- Add New Class Button -->
+    <div class="flex justify-end mb-6">
       <button class="inline-flex items-center gap-2 bg-gradient-to-r from-blue-500 to-purple-600 text-white px-4 py-2 rounded-xl font-medium hover:from-blue-600 hover:to-purple-700 transition-all duration-200 shadow-lg hover:shadow-xl min-h-[44px]">
         <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
           <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6v6m0 0v6m0-6h6m-6 0H6"></path>
