@@ -1,7 +1,8 @@
 <script setup>
 import AdminLayout from '@/Layouts/AdminLayout.vue';
-import { Head, usePage } from '@inertiajs/vue3';
+import { Head, usePage, router } from '@inertiajs/vue3';
 import { ref, computed } from 'vue';
+import StudentModal from '@/Components/StudentModal.vue';
 
 const page = usePage();
 const language = computed(() => page.props.language || {});
@@ -9,53 +10,70 @@ const language = computed(() => page.props.language || {});
 // Accept props from backend
 const props = defineProps({
   students: Array,
-  total: Number
+  total: Number,
+  formations: {
+    type: Array,
+    default: () => []
+  }
 });
 
 // Use data from props or fallback to mock data
-const students = ref(props.students || [
-  {
-    id: 1,
-    name: 'Liam Smith',
-    student_id: '#ST5A28',
-    grade: 'Grade 5 - Section A',
-    contact_parent: '+1234567890'
-  },
-  {
-    id: 2,
-    name: 'Olivia Johnson',
-    student_id: '#STP101',
-    grade: 'Physics 101',
-    contact_parent: '+1987654321'
-  },
-  {
-    id: 3,
-    name: 'Noah Williams',
-    student_id: '#STH832',
-    grade: 'History - Grade 8',
-    contact_parent: '+1122334455'
-  },
-  {
-    id: 4,
-    name: 'Emma Brown',
-    student_id: '#STAC25',
-    grade: 'Art & Craft',
-    contact_parent: '+1554433221'
-  }
-]);
+const students = ref(props.students || []);
 
 const searchQuery = ref('');
 const currentPage = ref(1);
-const totalStudents = ref(props.total || 1200);
-const studentsPerPage = ref(4);
+const studentsPerPage = ref(10); // Show more students per page
 
-// Pagination
-const totalPages = Math.ceil(totalStudents.value / studentsPerPage.value);
-const startIndex = (currentPage.value - 1) * studentsPerPage.value + 1;
-const endIndex = Math.min(currentPage.value * studentsPerPage.value, totalStudents.value);
+// Calculate pagination based on actual students
+const totalStudents = computed(() => students.value.length);
+const filteredStudents = computed(() => {
+  if (!searchQuery.value) return students.value;
+  
+  return students.value.filter(student => 
+    student.name.toLowerCase().includes(searchQuery.value.toLowerCase()) ||
+    student.student_id.toLowerCase().includes(searchQuery.value.toLowerCase()) ||
+    (student.email && student.email.toLowerCase().includes(searchQuery.value.toLowerCase()))
+  );
+});
+
+const paginatedStudents = computed(() => {
+  const start = (currentPage.value - 1) * studentsPerPage.value;
+  const end = start + studentsPerPage.value;
+  return filteredStudents.value.slice(start, end);
+});
+
+// Modal state
+const showStudentModal = ref(false);
+
+// Functions to handle modal
+const openStudentModal = () => {
+  showStudentModal.value = true;
+};
+
+const closeStudentModal = () => {
+  showStudentModal.value = false;
+};
+
+// Handle student creation success
+const handleStudentCreated = () => {
+  showStudentModal.value = false;
+  // Reset pagination to first page
+  currentPage.value = 1;
+  // Use Inertia router to reload the page with fresh data
+  router.visit('/admin/students', {
+    preserveState: false,
+    preserveScroll: false,
+    replace: true
+  });
+};
+
+// Pagination calculations
+const totalPages = computed(() => Math.ceil(filteredStudents.value.length / studentsPerPage.value));
+const startIndex = computed(() => (currentPage.value - 1) * studentsPerPage.value + 1);
+const endIndex = computed(() => Math.min(currentPage.value * studentsPerPage.value, filteredStudents.value.length));
 
 const goToPage = (page) => {
-  if (page >= 1 && page <= totalPages) {
+  if (page >= 1 && page <= totalPages.value) {
     currentPage.value = page;
   }
 };
@@ -67,7 +85,7 @@ const previousPage = () => {
 };
 
 const nextPage = () => {
-  if (currentPage.value < totalPages) {
+  if (currentPage.value < totalPages.value) {
     currentPage.value++;
   }
 };
@@ -79,11 +97,13 @@ const nextPage = () => {
 
     <!-- Add New Student Button -->
     <div class="flex justify-end mb-6">
-      <button class="inline-flex items-center gap-2 bg-gradient-to-r from-blue-500 to-purple-600 text-white px-4 py-2 rounded-xl font-medium hover:from-blue-600 hover:to-purple-700 transition-all duration-200 shadow-lg hover:shadow-xl min-h-[44px]">
+      <button 
+        @click="openStudentModal"
+        class="inline-flex items-center gap-2 bg-gradient-to-r from-blue-500 to-purple-600 text-white px-4 py-2 rounded-xl font-medium hover:from-blue-600 hover:to-purple-700 transition-all duration-200 shadow-lg hover:shadow-xl min-h-[44px]">
         <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
           <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6v6m0 0v6m0-6h6m-6 0H6"></path>
         </svg>
-        {{ language.add_new || 'Add New' }} {{ language.student_name || 'Student' }}
+        {{ language.add_new || 'Add New' }} {{ language.student || 'Student' }}
       </button>
     </div>
 
@@ -138,7 +158,7 @@ const nextPage = () => {
             </tr>
           </thead>
           <tbody class="divide-y divide-gray-100">
-            <tr v-for="student in students" :key="student.id" class="hover:bg-gray-50 transition-colors duration-150">
+            <tr v-for="student in paginatedStudents" :key="student.id" class="hover:bg-gray-50 transition-colors duration-150">
               <td class="py-4 px-6">
                 <div class="text-sm font-medium text-gray-900">{{ student.name }}</div>
               </td>
@@ -174,7 +194,7 @@ const nextPage = () => {
 
       <!-- Mobile Card View -->
       <div class="md:hidden divide-y divide-gray-100">
-        <div v-for="student in students" :key="student.id" class="p-4 sm:p-6">
+        <div v-for="student in paginatedStudents" :key="student.id" class="p-4 sm:p-6">
           <div class="flex items-start justify-between mb-3">
             <div class="flex-1 min-w-0">
               <h3 class="text-base font-medium text-gray-900 truncate">{{ student.name }}</h3>
@@ -212,7 +232,7 @@ const nextPage = () => {
       <div class="px-4 sm:px-6 py-4 border-t border-gray-100 bg-gray-50">
         <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
           <div class="text-sm text-gray-700">
-            Showing <span class="font-medium">{{ startIndex }}</span> to <span class="font-medium">{{ endIndex }}</span> of <span class="font-medium">{{ totalStudents }}</span> {{ language.students || 'Students' }}
+            Showing <span class="font-medium">{{ startIndex }}</span> to <span class="font-medium">{{ endIndex }}</span> of <span class="font-medium">{{ filteredStudents.length }}</span> {{ language.students || 'Students' }}
           </div>
           
           <div class="flex items-center justify-center sm:justify-end">
@@ -244,11 +264,6 @@ const nextPage = () => {
                 {{ page }}
               </button>
               
-              <!-- Ellipsis if there are more pages -->
-              <span v-if="totalPages > 5" class="relative inline-flex items-center px-4 py-2 border border-gray-300 text-sm text-gray-700 min-h-[44px]">
-                ...
-              </span>
-              
               <!-- Next Button -->
               <button 
                 @click="nextPage"
@@ -266,6 +281,14 @@ const nextPage = () => {
         </div>
       </div>
     </div>
+
+    <!-- Student Modal -->
+    <StudentModal 
+      :show="showStudentModal"
+      :formations="formations"
+      @close="closeStudentModal"
+      @student-created="handleStudentCreated"
+    />
   </AdminLayout>
 </template>
 

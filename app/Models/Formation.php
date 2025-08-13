@@ -4,6 +4,7 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
+use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 
 class Formation extends Model
 {
@@ -29,4 +30,12 @@ class Formation extends Model
         'enrolled_students' => 0,
         'status' => 'Active'
     ];
+
+    /**
+     * Get the students enrolled in this formation
+     */
+    public function students(): BelongsToMany
+    {
+        return $this->belongsToMany(Student::class, 'formation_student');
+    }
 }

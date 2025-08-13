@@ -22,6 +22,13 @@ class User extends Authenticatable
         'email',
         'password',
         'role',
+        'student_id',
+        'phone',
+        'parent_phone',
+        'address',
+        'date_of_birth',
+        'notes',
+        'email_verified_at',
     ];
 
     /**
@@ -44,6 +51,15 @@ class User extends Authenticatable
         return [
             'email_verified_at' => 'datetime',
             'password' => 'hashed',
+            'date_of_birth' => 'date',
         ];
+    }
+
+    /**
+     * Get the formations associated with the user (many-to-many)
+     */
+    public function formations()
+    {
+        return $this->belongsToMany(Formation::class, 'formation_user');
     }
 }

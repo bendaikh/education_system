@@ -6,6 +6,7 @@ use Illuminate\Http\Request;
 use Inertia\Inertia;
 use App\Models\Formation;
 use App\Models\User;
+use App\Models\Student;
 use App\Models\Payment;
 
 class PaymentController extends Controller
@@ -19,8 +20,8 @@ class PaymentController extends Controller
             ->map(function ($payment) {
                 return [
                     'id' => $payment->id,
-                    'student_name' => $payment->student->name,
-                    'payment_type' => $payment->formation->title,
+                    'student_name' => $payment->student ? $payment->student->name : 'Unknown Student',
+                    'payment_type' => $payment->formation ? $payment->formation->title : 'Unknown Formation',
                     'amount' => $payment->amount,
                     'status' => $payment->status,
                     'due_date' => $payment->due_date->format('Y-m-d'),
@@ -33,8 +34,8 @@ class PaymentController extends Controller
             ->where('status', 'Active')
             ->get();
         
-        $students = User::select('id', 'name', 'email')
-            ->where('role', 'student')
+        $students = Student::select('id', 'name', 'email')
+            ->where('status', 'active')
             ->orderBy('name')
             ->get();
 
@@ -52,7 +53,7 @@ class PaymentController extends Controller
     public function store(Request $request)
     {
         $validated = $request->validate([
-            'student_id' => 'required|exists:users,id',
+            'student_id' => 'required|exists:students,id',
             'formation_id' => 'required|exists:formations,id',
             'amount' => 'required|numeric|min:0',
             'payment_type' => 'required|string|in:Cash,Bank Transfer,Credit Card,Check,Online,Other',
@@ -61,7 +62,7 @@ class PaymentController extends Controller
         ]);
 
         // Get student and formation details
-        $student = User::findOrFail($validated['student_id']);
+        $student = Student::findOrFail($validated['student_id']);
         $formation = Formation::findOrFail($validated['formation_id']);
 
         // Create the payment in the database
