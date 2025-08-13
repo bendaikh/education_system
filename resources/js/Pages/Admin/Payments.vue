@@ -3,6 +3,7 @@ import AdminLayout from '@/Layouts/AdminLayout.vue';
 import { Head, usePage } from '@inertiajs/vue3';
 import { ref, computed } from 'vue';
 import { useCurrency } from '@/Composables/useCurrency.js';
+import PaymentModal from '@/Components/PaymentModal.vue';
 
 const page = usePage();
 const language = computed(() => page.props.language || {});
@@ -11,7 +12,15 @@ const { formatPrice } = useCurrency();
 // Accept props from backend
 const props = defineProps({
   payments: Array,
-  total: Number
+  total: Number,
+  formations: {
+    type: Array,
+    default: () => []
+  },
+  students: {
+    type: Array,
+    default: () => []
+  }
 });
 
 // Use data from props or fallback to mock data
@@ -21,6 +30,18 @@ const searchQuery = ref('');
 const currentPage = ref(1);
 const totalPayments = ref(props.total || 156);
 const paymentsPerPage = ref(4);
+
+// Modal state
+const showPaymentModal = ref(false);
+
+// Functions to handle modal
+const openPaymentModal = () => {
+  showPaymentModal.value = true;
+};
+
+const closePaymentModal = () => {
+  showPaymentModal.value = false;
+};
 
 // Pagination
 const totalPages = Math.ceil(totalPayments.value / paymentsPerPage.value);
@@ -66,11 +87,13 @@ const getStatusClass = (status) => {
 
     <!-- Add New Payment Button -->
     <div class="flex justify-end mb-6">
-      <button class="inline-flex items-center gap-2 bg-gradient-to-r from-blue-500 to-purple-600 text-white px-4 py-2 rounded-xl font-medium hover:from-blue-600 hover:to-purple-700 transition-all duration-200 shadow-lg hover:shadow-xl min-h-[44px]">
+      <button 
+        @click="openPaymentModal"
+        class="inline-flex items-center gap-2 bg-gradient-to-r from-blue-500 to-purple-600 text-white px-4 py-2 rounded-xl font-medium hover:from-blue-600 hover:to-purple-700 transition-all duration-200 shadow-lg hover:shadow-xl min-h-[44px]">
         <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
           <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6v6m0 0v6m0-6h6m-6 0H6"></path>
         </svg>
-        {{ language.add_new || 'Add New' }} {{ language.payment_type || 'Payment' }}
+        {{ language.add_new || 'Add New' }} {{ language.payment || 'Payment' }}
       </button>
     </div>
 
@@ -271,6 +294,14 @@ const getStatusClass = (status) => {
         </div>
       </div>
     </div>
+
+    <!-- Payment Modal -->
+    <PaymentModal 
+      :show="showPaymentModal"
+      :formations="formations"
+      :students="students"
+      @close="closePaymentModal"
+    />
   </AdminLayout>
 </template>
 
