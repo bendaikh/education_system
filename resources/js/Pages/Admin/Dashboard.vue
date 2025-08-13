@@ -2,9 +2,11 @@
 import AdminLayout from '@/Layouts/AdminLayout.vue';
 import { Head, usePage } from '@inertiajs/vue3';
 import { computed } from 'vue';
+import { useCurrency } from '@/Composables/useCurrency.js';
 
 const page = usePage();
 const language = computed(() => page.props.language || {});
+const { formatLargeAmount } = useCurrency();
 
 // Accept props from backend
 const props = defineProps({
@@ -40,7 +42,7 @@ const statsCards = computed(() => [
   },
   {
     title: 'Revenue',
-    value: props.stats?.revenue || '$1.2M',
+    value: props.stats?.revenue ? formatLargeAmount(props.stats.revenue) : formatLargeAmount(1200000),
     icon: 'revenue',
     color: 'red',
     bgColor: 'bg-red-50',

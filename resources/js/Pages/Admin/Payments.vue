@@ -2,9 +2,11 @@
 import AdminLayout from '@/Layouts/AdminLayout.vue';
 import { Head, usePage } from '@inertiajs/vue3';
 import { ref, computed } from 'vue';
+import { useCurrency } from '@/Composables/useCurrency.js';
 
 const page = usePage();
 const language = computed(() => page.props.language || {});
+const { formatPrice } = useCurrency();
 
 // Accept props from backend
 const props = defineProps({
@@ -132,7 +134,7 @@ const getStatusClass = (status) => {
                 <div class="text-sm text-gray-600">{{ payment.payment_type }}</div>
               </td>
               <td class="py-4 px-6">
-                <div class="text-sm font-semibold text-gray-900">{{ payment.amount }}</div>
+                <div class="text-sm font-semibold text-gray-900">{{ formatPrice(payment.amount) }}</div>
               </td>
               <td class="py-4 px-6">
                 <span :class="getStatusClass(payment.status)" class="px-2 py-1 text-xs font-medium rounded-full">
@@ -185,7 +187,7 @@ const getStatusClass = (status) => {
           <div class="grid grid-cols-2 gap-2 text-sm mb-4">
             <div>
               <span class="text-gray-500">{{ (language.amount || 'Amount') + ':' }}</span>
-              <span class="ml-1 text-gray-900 font-semibold">{{ payment.amount }}</span>
+              <span class="ml-1 text-gray-900 font-semibold">{{ formatPrice(payment.amount) }}</span>
             </div>
             <div>
               <span class="text-gray-500">{{ (language.due_date || 'Due Date') + ':' }}</span>
