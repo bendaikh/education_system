@@ -9,6 +9,7 @@ use App\Http\Controllers\PaymentController;
 use App\Http\Controllers\SubscriptionController;
 use App\Http\Controllers\FormationController;
 use App\Http\Controllers\LanguageController;
+use App\Http\Controllers\SettingsController;
 use Illuminate\Foundation\Application;
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\HomeController;
@@ -44,6 +45,8 @@ Route::middleware(['auth', 'verified'])->prefix('admin')->name('admin.')->group(
    Route::get('/formations', [FormationController::class, 'index'])->name('formations.index');
    Route::post('/formations', [FormationController::class, 'store'])->name('formations.store');
    Route::inertia('/user-management', 'Admin/UserManagement')->name('users.index');
+   Route::get('/settings', [SettingsController::class, 'index'])->name('settings.index');
+   Route::post('/settings', [SettingsController::class, 'update'])->name('settings.update');
 });
 
 require __DIR__.'/auth.php';

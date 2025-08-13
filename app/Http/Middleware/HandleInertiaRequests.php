@@ -34,6 +34,11 @@ class HandleInertiaRequests extends Middleware
             'auth' => [
                 'user' => $request->user(),
             ],
+            'settings' => [
+                'currency' => \App\Models\Setting::get('currency', 'USD ($)'),
+                'app_name' => \App\Models\Setting::get('app_name', config('app.name')),
+                'country' => \App\Models\Setting::get('country', 'United States'),
+            ],
         ];
     }
 }

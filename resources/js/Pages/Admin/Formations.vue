@@ -2,9 +2,11 @@
 import AdminLayout from '@/Layouts/AdminLayout.vue';
 import { Head, usePage, router } from '@inertiajs/vue3';
 import { ref, computed, watch } from 'vue';
+import { useCurrency } from '@/Composables/useCurrency.js';
 
 const page = usePage();
 const language = computed(() => page.props.language || {});
+const { formatPrice } = useCurrency();
 
 // Accept props from backend
 const props = defineProps({
@@ -293,7 +295,7 @@ const getLevelClass = (level) => {
                 </span>
               </td>
               <td class="py-4 px-6">
-                <div class="text-sm font-semibold text-gray-900">{{ formation.price }}</div>
+                <div class="text-sm font-semibold text-gray-900">{{ formatPrice(formation.price) }}</div>
               </td>
               <td class="py-4 px-6">
                 <span :class="getStatusClass(formation.status)" class="px-2 py-1 text-xs font-medium rounded-full">
@@ -360,7 +362,7 @@ const getLevelClass = (level) => {
             </div>
             <div>
               <span class="text-gray-500">{{ (language.price || 'Price') + ':' }}</span>
-              <span class="ml-1 text-gray-900 font-semibold">{{ formation.price }}</span>
+              <span class="ml-1 text-gray-900 font-semibold">{{ formatPrice(formation.price) }}</span>
             </div>
             <div>
               <span class="text-gray-500">{{ (language.enrolled_students || 'Students') + ':' }}</span>
@@ -564,7 +566,7 @@ const getLevelClass = (level) => {
                     </label>
                     <input v-model="formData.price" type="text" required 
                            class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                           placeholder="$299" />
+                           :placeholder="formatPrice(299)" />
                   </div>
 
                   <!-- Duration (Optional) -->

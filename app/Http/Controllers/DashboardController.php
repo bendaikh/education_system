@@ -15,7 +15,7 @@ class DashboardController extends Controller
             'totalStudents' => 1250,
             'totalTeachers' => 75,
             'totalClasses' => 50,
-            'revenue' => '$1.2M'
+            'revenue' => 1200000 // Numeric value in base currency units
         ];
 
         $recentActivity = [
