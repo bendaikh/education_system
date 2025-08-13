@@ -1,6 +1,6 @@
 <script setup>
 import { ref, computed } from 'vue';
-import { useForm, usePage } from '@inertiajs/vue3';
+import { useForm, usePage, router } from '@inertiajs/vue3';
 import Modal from '@/Components/Modal.vue';
 import PrimaryButton from '@/Components/PrimaryButton.vue';
 import SecondaryButton from '@/Components/SecondaryButton.vue';
@@ -24,7 +24,7 @@ const props = defineProps({
     }
 });
 
-const emit = defineEmits(['close']);
+const emit = defineEmits(['close', 'payment-created']);
 
 const page = usePage();
 const language = computed(() => page.props.language || {});
@@ -71,6 +71,8 @@ const submitForm = () => {
         preserveScroll: true,
         onSuccess: () => {
             closeModal();
+            // Emit event to parent component to refresh data
+            emit('payment-created');
         },
         onError: () => {
             // Errors will be handled by form validation

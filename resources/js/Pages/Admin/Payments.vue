@@ -1,6 +1,6 @@
 <script setup>
 import AdminLayout from '@/Layouts/AdminLayout.vue';
-import { Head, usePage } from '@inertiajs/vue3';
+import { Head, usePage, router } from '@inertiajs/vue3';
 import { ref, computed } from 'vue';
 import { useCurrency } from '@/Composables/useCurrency.js';
 import PaymentModal from '@/Components/PaymentModal.vue';
@@ -28,8 +28,25 @@ const payments = ref(props.payments || []);
 
 const searchQuery = ref('');
 const currentPage = ref(1);
-const totalPayments = ref(props.total || 156);
-const paymentsPerPage = ref(4);
+const paymentsPerPage = ref(10); // Show more payments per page
+
+// Calculate pagination based on actual payments
+const totalPayments = computed(() => payments.value.length);
+const filteredPayments = computed(() => {
+  if (!searchQuery.value) return payments.value;
+  
+  return payments.value.filter(payment => 
+    payment.student_name.toLowerCase().includes(searchQuery.value.toLowerCase()) ||
+    payment.payment_type.toLowerCase().includes(searchQuery.value.toLowerCase()) ||
+    payment.status.toLowerCase().includes(searchQuery.value.toLowerCase())
+  );
+});
+
+const paginatedPayments = computed(() => {
+  const start = (currentPage.value - 1) * paymentsPerPage.value;
+  const end = start + paymentsPerPage.value;
+  return filteredPayments.value.slice(start, end);
+});
 
 // Modal state
 const showPaymentModal = ref(false);
@@ -43,13 +60,26 @@ const closePaymentModal = () => {
   showPaymentModal.value = false;
 };
 
-// Pagination
-const totalPages = Math.ceil(totalPayments.value / paymentsPerPage.value);
-const startIndex = (currentPage.value - 1) * paymentsPerPage.value + 1;
-const endIndex = Math.min(currentPage.value * paymentsPerPage.value, totalPayments.value);
+// Handle payment creation success
+const handlePaymentCreated = () => {
+  showPaymentModal.value = false;
+  // Reset pagination to first page
+  currentPage.value = 1;
+  // Use Inertia router to reload the page with fresh data
+  router.visit('/admin/payments', {
+    preserveState: false,
+    preserveScroll: false,
+    replace: true
+  });
+};
+
+// Pagination calculations
+const totalPages = computed(() => Math.ceil(filteredPayments.value.length / paymentsPerPage.value));
+const startIndex = computed(() => (currentPage.value - 1) * paymentsPerPage.value + 1);
+const endIndex = computed(() => Math.min(currentPage.value * paymentsPerPage.value, filteredPayments.value.length));
 
 const goToPage = (page) => {
-  if (page >= 1 && page <= totalPages) {
+  if (page >= 1 && page <= totalPages.value) {
     currentPage.value = page;
   }
 };
@@ -61,7 +91,7 @@ const previousPage = () => {
 };
 
 const nextPage = () => {
-  if (currentPage.value < totalPages) {
+  if (currentPage.value < totalPages.value) {
     currentPage.value++;
   }
 };
@@ -149,7 +179,7 @@ const getStatusClass = (status) => {
             </tr>
           </thead>
           <tbody class="divide-y divide-gray-100">
-            <tr v-for="payment in payments" :key="payment.id" class="hover:bg-gray-50 transition-colors duration-150">
+            <tr v-for="payment in paginatedPayments" :key="payment.id" class="hover:bg-gray-50 transition-colors duration-150">
               <td class="py-4 px-6">
                 <div class="text-sm font-medium text-gray-900">{{ payment.student_name }}</div>
               </td>
@@ -197,7 +227,7 @@ const getStatusClass = (status) => {
 
       <!-- Mobile Card View -->
       <div class="md:hidden divide-y divide-gray-100">
-        <div v-for="payment in payments" :key="payment.id" class="p-4 sm:p-6">
+        <div v-for="payment in paginatedPayments" :key="payment.id" class="p-4 sm:p-6">
           <div class="flex items-start justify-between mb-3">
             <div class="flex-1 min-w-0">
               <h3 class="text-base font-medium text-gray-900 truncate">{{ payment.student_name }}</h3>
@@ -245,7 +275,7 @@ const getStatusClass = (status) => {
       <div class="px-4 sm:px-6 py-4 border-t border-gray-100 bg-gray-50">
         <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
           <div class="text-sm text-gray-700">
-            Showing <span class="font-medium">{{ startIndex }}</span> to <span class="font-medium">{{ endIndex }}</span> of <span class="font-medium">{{ totalPayments }}</span> {{ language.payments || 'Payments' }}
+            Showing <span class="font-medium">{{ startIndex }}</span> to <span class="font-medium">{{ endIndex }}</span> of <span class="font-medium">{{ filteredPayments.length }}</span> {{ language.payments || 'Payments' }}
           </div>
           
           <div class="flex items-center justify-center sm:justify-end">
@@ -301,6 +331,7 @@ const getStatusClass = (status) => {
       :formations="formations"
       :students="students"
       @close="closePaymentModal"
+      @payment-created="handlePaymentCreated"
     />
   </AdminLayout>
 </template>

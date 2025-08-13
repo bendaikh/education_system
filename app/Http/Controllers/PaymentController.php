@@ -65,7 +65,7 @@ class PaymentController extends Controller
         $formation = Formation::findOrFail($validated['formation_id']);
 
         // Create the payment in the database
-        Payment::create([
+        $payment = Payment::create([
             'student_id' => $validated['student_id'],
             'formation_id' => $validated['formation_id'],
             'amount' => $validated['amount'],
@@ -75,6 +75,9 @@ class PaymentController extends Controller
             'status' => 'Pending', // Default status
             'created_by' => auth()->id()
         ]);
+
+        // Log for debugging
+        \Log::info('Payment created:', ['payment_id' => $payment->id, 'student_id' => $payment->student_id]);
 
         return redirect()->back()->with('success', 'Payment created successfully!');
     }
