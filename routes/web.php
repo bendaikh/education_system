@@ -7,6 +7,7 @@ use App\Http\Controllers\StudentController;
 use App\Http\Controllers\TeacherController;
 use App\Http\Controllers\PaymentController;
 use App\Http\Controllers\SubscriptionController;
+use App\Http\Controllers\FormationController;
 use App\Http\Controllers\LanguageController;
 use Illuminate\Foundation\Application;
 use Illuminate\Support\Facades\Route;
@@ -38,9 +39,11 @@ Route::middleware(['auth', 'verified'])->prefix('admin')->name('admin.')->group(
     Route::get('/classes', [ClassController::class, 'index'])->name('classes.index');
     Route::get('/students', [StudentController::class, 'index'])->name('students.index');
     Route::get('/teachers', [TeacherController::class, 'index'])->name('teachers.index');
-    Route::get('/payments', [PaymentController::class, 'index'])->name('payments.index');
-    Route::get('/subscriptions', [SubscriptionController::class, 'index'])->name('subscriptions.index');
-    Route::inertia('/user-management', 'Admin/UserManagement')->name('users.index');
+       Route::get('/payments', [PaymentController::class, 'index'])->name('payments.index');
+   Route::get('/subscriptions', [SubscriptionController::class, 'index'])->name('subscriptions.index');
+   Route::get('/formations', [FormationController::class, 'index'])->name('formations.index');
+   Route::post('/formations', [FormationController::class, 'store'])->name('formations.store');
+   Route::inertia('/user-management', 'Admin/UserManagement')->name('users.index');
 });
 
 require __DIR__.'/auth.php';

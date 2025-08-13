@@ -9,6 +9,7 @@ return [
     'admins' => 'Admins',
     'payments' => 'Payments',
     'subscriptions' => 'Subscriptions',
+    'formations' => 'Formations',
     'user_management' => 'User Management',
     'settings' => 'Settings',
     'logout' => 'Logout',
@@ -71,6 +72,24 @@ return [
     'next_billing' => 'Next Billing',
     'features' => 'Features',
     'subscriber' => 'Subscriber',
+
+    // Formations
+    'formation_title' => 'Formation Title',
+    'formation_teachers' => 'Teachers',
+    'duration' => 'Duration',
+    'level' => 'Level',
+    'enrolled_students' => 'Enrolled Students',
+    'start_date' => 'Start Date',
+    'end_date' => 'End Date',
+    'description' => 'Description',
+    'beginner' => 'Beginner',
+    'intermediate' => 'Intermediate',
+    'advanced' => 'Advanced',
+    'optional' => 'Optional',
+    'required' => 'Required',
+    'select_level' => 'Select Level',
+    'select_teachers' => 'Select Teachers',
+    'close' => 'Close',
 
     // Dashboard
     'recent_activity' => 'Recent Activity',

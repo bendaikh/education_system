@@ -73,6 +73,7 @@ const navItems = computed(() => {
         { label: language.classes || 'Classes', href: '/admin/classes' },
         { label: language.students || 'Students', href: '/admin/students' },
         { label: language.teachers || 'Teachers', href: '/admin/teachers' },
+        { label: language.formations || 'Formations', href: '/admin/formations' },
         { label: language.admins || 'Admins', href: '/admin/admins' },
         { label: language.payments || 'Payments', href: '/admin/payments' },
         { label: language.subscriptions || 'Subscriptions', href: '/admin/subscriptions' },
@@ -194,6 +195,11 @@ const navItems = computed(() => {
                            <!-- Teachers Icon -->
                            <svg v-else-if="item.href === '/admin/teachers'" class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"></path>
+                           </svg>
+                           <!-- Formations Icon -->
+                           <svg v-else-if="item.href === '/admin/formations'" class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                               <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 14l9-5-9-5-9 5 9 5z"></path>
+                               <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 14l6.16-3.422a12.083 12.083 0 01.665 6.479A11.952 11.952 0 0012 20.055a11.952 11.952 0 00-6.824-2.998 12.078 12.078 0 01.665-6.479L12 14z"></path>
                            </svg>
                            <!-- Admins Icon -->
                            <svg v-else-if="item.href === '/admin/admins'" class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">

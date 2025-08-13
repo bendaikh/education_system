@@ -9,6 +9,7 @@ return [
     'admins' => 'Administrateurs',
     'payments' => 'Paiements',
     'subscriptions' => 'Abonnements',
+    'formations' => 'Formations',
     'user_management' => 'Gestion des utilisateurs',
     'settings' => 'Paramètres',
     'logout' => 'Déconnexion',
@@ -71,6 +72,24 @@ return [
     'next_billing' => 'Prochaine facturation',
     'features' => 'Fonctionnalités',
     'subscriber' => 'Abonné',
+
+    // Formations
+    'formation_title' => 'Titre de la formation',
+    'formation_teachers' => 'Enseignants',
+    'duration' => 'Durée',
+    'level' => 'Niveau',
+    'enrolled_students' => 'Étudiants inscrits',
+    'start_date' => 'Date de début',
+    'end_date' => 'Date de fin',
+    'description' => 'Description',
+    'beginner' => 'Débutant',
+    'intermediate' => 'Intermédiaire',
+    'advanced' => 'Avancé',
+    'optional' => 'Optionnel',
+    'required' => 'Requis',
+    'select_level' => 'Sélectionner le niveau',
+    'select_teachers' => 'Sélectionner les enseignants',
+    'close' => 'Fermer',
 
     // Dashboard
     'recent_activity' => 'Activité récente',
