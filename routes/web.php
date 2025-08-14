@@ -41,6 +41,7 @@ Route::middleware(['auth', 'verified'])->prefix('admin')->name('admin.')->group(
     Route::get('/students', [StudentController::class, 'index'])->name('students.index');
    Route::post('/students', [StudentController::class, 'store'])->name('students.store');
     Route::get('/teachers', [TeacherController::class, 'index'])->name('teachers.index');
+    Route::post('/teachers', [TeacherController::class, 'store'])->name('teachers.store');
        Route::get('/payments', [PaymentController::class, 'index'])->name('payments.index');
    Route::post('/payments', [PaymentController::class, 'store'])->name('payments.store');
    Route::get('/subscriptions', [SubscriptionController::class, 'index'])->name('subscriptions.index');
