@@ -25,64 +25,10 @@ class FormationController extends Controller
             ['id' => 8, 'name' => 'Maria Garcia', 'department' => 'UI/UX Design']
         ];
 
-        // Mock data for formations - replace with real data from database later
-        $defaultFormations = [
-            [
-                'id' => 1,
-                'title' => 'Web Development Fundamentals',
-                'description' => 'Learn HTML, CSS, and JavaScript basics',
-                'teachers' => ['John Smith', 'David Wilson'],
-                'duration' => '12 weeks',
-                'level' => 'Beginner',
-                'price' => '$299',
-                'status' => 'Active',
-                'enrolled_students' => 25
-            ],
-            [
-                'id' => 2,
-                'title' => 'Advanced React Development',
-                'description' => 'Master React hooks, context, and advanced patterns',
-                'teachers' => ['Sarah Johnson'],
-                'duration' => '8 weeks',
-                'level' => 'Advanced',
-                'price' => '$399',
-                'status' => 'Active',
-                'enrolled_students' => 18
-            ],
-            [
-                'id' => 3,
-                'title' => 'Database Design & SQL',
-                'description' => 'Learn database design principles and SQL queries',
-                'teachers' => ['Michael Brown', 'Lisa Anderson'],
-                'duration' => '6 weeks',
-                'level' => 'Intermediate',
-                'price' => '$249',
-                'status' => 'Coming Soon',
-                'enrolled_students' => 0
-            ],
-            [
-                'id' => 4,
-                'title' => 'Mobile App Development',
-                'description' => 'Build native mobile apps with React Native',
-                'teachers' => ['Emily Davis', 'James Taylor'],
-                'duration' => '10 weeks',
-                'level' => 'Intermediate',
-                'price' => '$349',
-                'status' => 'Active',
-                'enrolled_students' => 22
-            ]
-        ];
 
-        // Get formations from database, or seed with default data if table is empty
+
+        // Get formations from database
         $formations = Formation::all();
-        
-        // If no formations exist, seed with default data
-        if ($formations->isEmpty()) {
-            foreach ($defaultFormations as $formationData) {
-                Formation::create($formationData);
-            }
-            $formations = Formation::all();
-        }
 
         return Inertia::render('Admin/Formations', [
             'formations' => $formations->toArray(),
