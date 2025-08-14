@@ -44,6 +44,9 @@ Route::middleware(['auth', 'verified'])->prefix('admin')->name('admin.')->group(
        Route::get('/payments', [PaymentController::class, 'index'])->name('payments.index');
    Route::post('/payments', [PaymentController::class, 'store'])->name('payments.store');
    Route::get('/subscriptions', [SubscriptionController::class, 'index'])->name('subscriptions.index');
+   Route::post('/subscriptions', [SubscriptionController::class, 'store'])->name('subscriptions.store');
+   Route::get('/subscriptions/types', [SubscriptionController::class, 'typesIndex'])->name('subscriptions.types.index');
+   Route::post('/subscriptions/types', [SubscriptionController::class, 'storeType'])->name('subscriptions.types.store');
    Route::get('/formations', [FormationController::class, 'index'])->name('formations.index');
    Route::post('/formations', [FormationController::class, 'store'])->name('formations.store');
    Route::inertia('/user-management', 'Admin/UserManagement')->name('users.index');
