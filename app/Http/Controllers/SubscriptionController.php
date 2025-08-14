@@ -125,6 +125,7 @@ class SubscriptionController extends Controller
                 'formation_name' => $type->formation?->title ?? null,
                 'description' => $type->description,
                 'price' => (float) $type->price,
+                'formatted_price' => $type->formatted_price, // Add formatted price with correct currency
                 'duration' => $type->duration,
                 'max_students' => $type->max_students,
                 'features' => $type->features ?? [],
