@@ -160,12 +160,6 @@ const submitForm = () => {
     });
 };
 
-const formatPrice = (price, duration) => {
-    const numPrice = parseFloat(price) || 0;
-    if (numPrice === 0) return 'Free';
-    return `$${numPrice.toFixed(2)}/${duration}`;
-};
-
 const getStatusColor = (isActive) => {
     return isActive ? 'bg-green-100 text-green-800' : 'bg-red-100 text-red-800';
 };
@@ -249,7 +243,7 @@ const getStatusColor = (isActive) => {
                                 </div>
                             </td>
                             <td class="py-4 px-6">
-                                <div class="text-sm font-semibold text-gray-900">{{ formatPrice(type.price, type.duration) }}</div>
+                                <div class="text-sm font-semibold text-gray-900">{{ type.formatted_price }}</div>
                                 <div class="text-xs text-gray-500 capitalize">{{ type.duration }} billing</div>
                             </td>
                             <td class="py-4 px-6">
@@ -308,7 +302,7 @@ const getStatusColor = (isActive) => {
                     <div class="grid grid-cols-1 gap-2 text-sm mb-4">
                         <div>
                             <span class="text-gray-500">{{ (language.price || 'Price') + ':' }}</span>
-                            <span class="ml-1 text-gray-900 font-semibold">{{ formatPrice(type.price, type.duration) }}</span>
+                            <span class="ml-1 text-gray-900 font-semibold">{{ type.formatted_price }}</span>
                             <span class="ml-1 text-gray-500 text-xs capitalize">({{ type.duration }})</span>
                         </div>
                         <div>
@@ -462,7 +456,7 @@ const getStatusColor = (isActive) => {
 
                         <!-- Price -->
                         <div>
-                            <InputLabel for="modal-price" value="Price (USD)" />
+                            <InputLabel for="modal-price" value="Price" />
                             <TextInput
                                 id="modal-price"
                                 v-model="form.price"

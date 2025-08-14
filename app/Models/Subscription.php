@@ -59,7 +59,18 @@ class Subscription extends Model
     // Accessors
     public function getFormattedAmountAttribute()
     {
-        return '$' . number_format($this->amount_paid, 2);
+        // Get currency from settings
+        $currency = \App\Models\Setting::get('currency', 'USD ($)');
+        
+        // Extract currency symbol from setting (e.g., "MAD (DH)" -> "DH", "USD ($)" -> "$")
+        if (preg_match('/\(([^)]+)\)/', $currency, $matches)) {
+            $currencySymbol = $matches[1];
+        } else {
+            // Fallback to first 3 characters if no parentheses found
+            $currencySymbol = substr($currency, 0, 3);
+        }
+        
+        return $currencySymbol . ' ' . number_format($this->amount_paid, 2);
     }
 
     public function getIsActiveAttribute()
