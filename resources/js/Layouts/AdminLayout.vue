@@ -33,6 +33,9 @@ const switchLanguage = (locale) => {
 // Sidebar state - open by default on desktop, closed on mobile
 const sidebarOpen = ref(false);
 
+// Dropdown state for navigation items with subitems
+const dropdownOpen = ref({});
+
 // Set initial state based on screen size
 onMounted(() => {
     // Check if we're on desktop (lg breakpoint = 1024px)
@@ -66,6 +69,11 @@ const handleNavClick = () => {
     }
 };
 
+// Toggle dropdown for navigation items
+const toggleDropdown = (itemKey) => {
+    dropdownOpen.value[itemKey] = !dropdownOpen.value[itemKey];
+};
+
 const navItems = computed(() => {
     const language = page.props.language || {};
     return [
@@ -75,7 +83,21 @@ const navItems = computed(() => {
         { label: language.teachers || 'Teachers', href: '/admin/teachers' },
         { label: language.formations || 'Formations', href: '/admin/formations' },
         { label: language.payments || 'Payments', href: '/admin/payments' },
-        { label: language.subscriptions || 'Subscriptions', href: '/admin/subscriptions' },
+        { 
+            label: language.subscriptions || 'Subscriptions', 
+            key: 'subscriptions',
+            hasSubmenu: true,
+            subitems: [
+                { 
+                    label: language.manage_subscription_types || 'Manage Subscription Types', 
+                    href: '/admin/subscriptions/types' 
+                },
+                { 
+                    label: language.manage_subscriptions || 'Manage Subscriptions', 
+                    href: '/admin/subscriptions' 
+                }
+            ]
+        },
     ];
 });
 </script>
@@ -168,52 +190,104 @@ const navItems = computed(() => {
 
                     <!-- Navigation -->
                     <nav class="flex-1 space-y-2 pt-4">
-                        <InertiaLink v-for="item in navItems" :key="'side-'+item.href" :href="item.href"
-                            :class="[
-                                'nav-item-glow group flex items-center gap-3 px-4 py-3 rounded-xl transition-all duration-200 min-h-[44px] relative overflow-hidden',
-                                $page.url.startsWith(item.href) 
-                                    ? 'bg-gradient-to-r from-blue-500 to-purple-600 text-white shadow-lg shadow-blue-500/25' 
-                                    : 'text-slate-300 hover:text-white hover:bg-slate-700/50 hover:shadow-lg hover:shadow-slate-900/20'
-                            ]"
-                            @click="handleNavClick">
-                                                   <!-- Icon for each nav item -->
-                       <div class="w-5 h-5 flex-shrink-0">
-                           <!-- Dashboard Icon -->
-                           <svg v-if="item.href === '/admin/dashboard'" class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 7v10a2 2 0 002 2h14a2 2 0 002-2V9a2 2 0 00-2-2H5a2 2 0 00-2-2z"></path>
-                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 5a2 2 0 012-2h4a2 2 0 012 2v6a2 2 0 01-2 2H10a2 2 0 01-2-2V5z"></path>
-                                </svg>
-                                                           <!-- Classes Icon -->
-                           <svg v-else-if="item.href === '/admin/classes'" class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                               <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18.477 18.246 18 16.5 18c-1.746 0-3.332.477-4.5 1.253"></path>
-                           </svg>
-                           <!-- Students Icon -->
-                           <svg v-else-if="item.href === '/admin/students'" class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                               <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197m13.5-9a2.5 2.5 0 11-5 0 2.5 2.5 0 015 0z"></path>
-                           </svg>
-                           <!-- Teachers Icon -->
-                           <svg v-else-if="item.href === '/admin/teachers'" class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                               <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"></path>
-                           </svg>
-                           <!-- Formations Icon -->
-                           <svg v-else-if="item.href === '/admin/formations'" class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                               <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 14l9-5-9-5-9 5 9 5z"></path>
-                               <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 14l6.16-3.422a12.083 12.083 0 01.665 6.479A11.952 11.952 0 0012 20.055a11.952 11.952 0 00-6.824-2.998 12.078 12.078 0 01.665-6.479L12 14z"></path>
-                           </svg>
+                        <template v-for="item in navItems" :key="'side-'+(item.href || item.key)">
+                            <!-- Regular navigation item -->
+                            <InertiaLink v-if="!item.hasSubmenu" :href="item.href"
+                                :class="[
+                                    'nav-item-glow group flex items-center gap-3 px-4 py-3 rounded-xl transition-all duration-200 min-h-[44px] relative overflow-hidden',
+                                    $page.url.startsWith(item.href) 
+                                        ? 'bg-gradient-to-r from-blue-500 to-purple-600 text-white shadow-lg shadow-blue-500/25' 
+                                        : 'text-slate-300 hover:text-white hover:bg-slate-700/50 hover:shadow-lg hover:shadow-slate-900/20'
+                                ]"
+                                @click="handleNavClick">
+                                <!-- Icon for each nav item -->
+                                <div class="w-5 h-5 flex-shrink-0">
+                                    <!-- Dashboard Icon -->
+                                    <svg v-if="item.href === '/admin/dashboard'" class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 7v10a2 2 0 002 2h14a2 2 0 002-2V9a2 2 0 00-2-2H5a2 2 0 00-2-2z"></path>
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 5a2 2 0 012-2h4a2 2 0 012 2v6a2 2 0 01-2 2H10a2 2 0 01-2-2V5z"></path>
+                                    </svg>
+                                    <!-- Classes Icon -->
+                                    <svg v-else-if="item.href === '/admin/classes'" class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18.477 18.246 18 16.5 18c-1.746 0-3.332.477-4.5 1.253"></path>
+                                    </svg>
+                                    <!-- Students Icon -->
+                                    <svg v-else-if="item.href === '/admin/students'" class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197m13.5-9a2.5 2.5 0 11-5 0 2.5 2.5 0 015 0z"></path>
+                                    </svg>
+                                    <!-- Teachers Icon -->
+                                    <svg v-else-if="item.href === '/admin/teachers'" class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"></path>
+                                    </svg>
+                                    <!-- Formations Icon -->
+                                    <svg v-else-if="item.href === '/admin/formations'" class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 14l9-5-9-5-9 5 9 5z"></path>
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 14l6.16-3.422a12.083 12.083 0 01.665 6.479A11.952 11.952 0 0012 20.055a11.952 11.952 0 00-6.824-2.998 12.078 12.078 0 01.665-6.479L12 14z"></path>
+                                    </svg>
+                                    <!-- Payments Icon -->
+                                    <svg v-else-if="item.href === '/admin/payments'" class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 9V7a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2m2 4h10a2 2 0 002-2v-6a2 2 0 00-2-2H9a2 2 0 00-2 2v6a2 2 0 002 2zm7-5a2 2 0 11-4 0 2 2 0 014 0z"></path>
+                                    </svg>
+                                </div>
+                                <span class="font-medium">{{ item.label }}</span>
+                                <!-- Active indicator -->
+                                <div v-if="$page.url.startsWith(item.href)" class="absolute inset-y-0 left-0 w-1 bg-white rounded-r-full"></div>
+                            </InertiaLink>
 
-                           <!-- Payments Icon -->
-                           <svg v-else-if="item.href === '/admin/payments'" class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                               <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 9V7a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2m2 4h10a2 2 0 002-2v-6a2 2 0 00-2-2H9a2 2 0 00-2 2v6a2 2 0 002 2zm7-5a2 2 0 11-4 0 2 2 0 014 0z"></path>
-                           </svg>
-                           <!-- Subscriptions Icon -->
-                           <svg v-else-if="item.href === '/admin/subscriptions'" class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                               <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v10a2 2 0 002 2h8a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-3 7h3m-3 4h3m-6-4h.01M9 16h.01"></path>
-                           </svg>
+                            <!-- Dropdown navigation item -->
+                            <div v-else class="space-y-1">
+                                <!-- Parent item -->
+                                <button 
+                                    @click="toggleDropdown(item.key)"
+                                    :class="[
+                                        'nav-item-glow group flex items-center justify-between w-full gap-3 px-4 py-3 rounded-xl transition-all duration-200 min-h-[44px] relative overflow-hidden',
+                                        item.subitems.some(subitem => $page.url === subitem.href)
+                                            ? 'bg-gradient-to-r from-blue-500 to-purple-600 text-white shadow-lg shadow-blue-500/25' 
+                                            : 'text-slate-300 hover:text-white hover:bg-slate-700/50 hover:shadow-lg hover:shadow-slate-900/20'
+                                    ]"
+                                >
+                                    <div class="flex items-center gap-3">
+                                        <!-- Subscriptions Icon -->
+                                        <div class="w-5 h-5 flex-shrink-0">
+                                            <svg v-if="item.key === 'subscriptions'" class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v10a2 2 0 002 2h8a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-3 7h3m-3 4h3m-6-4h.01M9 16h.01"></path>
+                                            </svg>
+                                        </div>
+                                        <span class="font-medium">{{ item.label }}</span>
+                                    </div>
+                                    <!-- Dropdown arrow -->
+                                    <div class="w-4 h-4 flex-shrink-0 transition-transform duration-200" :class="{ 'rotate-180': dropdownOpen[item.key] }">
+                                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path>
+                                        </svg>
+                                    </div>
+                                    <!-- Active indicator -->
+                                    <div v-if="item.subitems.some(subitem => $page.url === subitem.href)" class="absolute inset-y-0 left-0 w-1 bg-white rounded-r-full"></div>
+                                </button>
+
+                                <!-- Subitems -->
+                                <transition name="dropdown">
+                                    <div v-if="dropdownOpen[item.key]" class="ml-6 space-y-1">
+                                        <InertiaLink 
+                                            v-for="subitem in item.subitems" 
+                                            :key="subitem.href" 
+                                            :href="subitem.href"
+                                            :class="[
+                                                'group flex items-center gap-3 px-4 py-2 rounded-lg transition-all duration-200 min-h-[36px] relative',
+                                                $page.url === subitem.href
+                                                    ? 'bg-gradient-to-r from-blue-400 to-purple-500 text-white shadow-md' 
+                                                    : 'text-slate-400 hover:text-white hover:bg-slate-700/30'
+                                            ]"
+                                            @click="handleNavClick"
+                                        >
+                                            <div class="w-2 h-2 rounded-full bg-current opacity-60"></div>
+                                            <span class="text-sm font-medium">{{ subitem.label }}</span>
+                                            <div v-if="$page.url === subitem.href" class="absolute inset-y-0 left-0 w-1 bg-white rounded-r-full"></div>
+                                        </InertiaLink>
+                                    </div>
+                                </transition>
                             </div>
-                            <span class="font-medium">{{ item.label }}</span>
-                            <!-- Active indicator -->
-                            <div v-if="$page.url.startsWith(item.href)" class="absolute inset-y-0 left-0 w-1 bg-white rounded-r-full"></div>
-                        </InertiaLink>
+                        </template>
                         
                                            <!-- User Management -->
                    <InertiaLink href="/admin/user-management"
@@ -281,4 +355,21 @@ const navItems = computed(() => {
     </div>
 </template>
 
-<style scoped></style>
+<style scoped>
+.dropdown-enter-active,
+.dropdown-leave-active {
+    transition: all 0.2s ease;
+}
+
+.dropdown-enter-from,
+.dropdown-leave-to {
+    opacity: 0;
+    transform: translateY(-10px);
+}
+
+.dropdown-enter-to,
+.dropdown-leave-from {
+    opacity: 1;
+    transform: translateY(0);
+}
+</style>

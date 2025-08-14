@@ -9,6 +9,8 @@ return [
     'admins' => 'Administrateurs',
     'payments' => 'Paiements',
     'subscriptions' => 'Abonnements',
+    'manage_subscription_types' => 'Gérer les types d\'abonnement',
+    'manage_subscriptions' => 'Gérer les abonnements',
     'formations' => 'Formations',
     'user_management' => 'Gestion des utilisateurs',
     'settings' => 'Paramètres',
