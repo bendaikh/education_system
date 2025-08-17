@@ -16,10 +16,14 @@ const props = defineProps({
     formations: {
         type: Array,
         default: () => []
+    },
+    editingStudent: {
+        type: Object,
+        default: null
     }
 });
 
-const emit = defineEmits(['close', 'student-created']);
+const emit = defineEmits(['close', 'student-created', 'student-updated']);
 
 const page = usePage();
 const language = computed(() => page.props.language || {});
@@ -36,7 +40,8 @@ const form = useForm({
     address: '',
     date_of_birth: '',
     formations: [], // Array of formation IDs
-    notes: ''
+    notes: '',
+    status: 'active'
 });
 
 // Generate student ID automatically
@@ -114,22 +119,37 @@ const submitForm = () => {
         address: form.address,
         date_of_birth: form.date_of_birth,
         formations: form.formations,
-        notes: form.notes
+        notes: form.notes,
+        status: form.status
     });
     
-    form.post('/admin/students', {
-        preserveScroll: true,
-        onSuccess: () => {
-            console.log('Student created successfully!');
-            closeModal();
-            // Emit event to parent component to refresh data
-            emit('student-created');
-        },
-        onError: (errors) => {
-            console.error('Form submission errors:', errors);
-            // Errors will be handled by form validation
-        }
-    });
+    if (props.editingStudent) {
+        // Update existing student
+        form.put(`/admin/students/${props.editingStudent.id}`, {
+            preserveScroll: true,
+            onSuccess: () => {
+                console.log('Student updated successfully!');
+                closeModal();
+                emit('student-updated');
+            },
+            onError: (errors) => {
+                console.error('Form submission errors:', errors);
+            }
+        });
+    } else {
+        // Create new student
+        form.post('/admin/students', {
+            preserveScroll: true,
+            onSuccess: () => {
+                console.log('Student created successfully!');
+                closeModal();
+                emit('student-created');
+            },
+            onError: (errors) => {
+                console.error('Form submission errors:', errors);
+            }
+        });
+    }
 };
 
 // Close modal and reset form
@@ -144,6 +164,33 @@ const closeModal = () => {
     formationSearchQuery.value = '';
     emit('close');
 };
+
+// Watch for editing student changes
+import { watch } from 'vue';
+
+watch(() => props.editingStudent, (newStudent) => {
+    if (newStudent) {
+        // Fill form with student data for editing
+        form.name = newStudent.name || '';
+        form.email = newStudent.email || '';
+        form.student_id = newStudent.student_id || '';
+        form.phone = newStudent.phone || '';
+        form.parent_phone = newStudent.parent_phone || '';
+        form.address = newStudent.address || '';
+        form.date_of_birth = newStudent.date_of_birth || '';
+        form.notes = newStudent.notes || '';
+        form.status = newStudent.status || 'active';
+        form.formations = newStudent.formations || [];
+        
+        // Update student ID display
+        studentId.value = newStudent.student_id || generateStudentId();
+    } else {
+        // Reset form for new student
+        form.reset();
+        studentId.value = generateStudentId();
+        form.student_id = studentId.value;
+    }
+}, { immediate: true });
 
 // Get today's date for max date of birth (should be in the past)
 const today = new Date().toISOString().split('T')[0];
@@ -164,7 +211,7 @@ const minDateString = minDate.toISOString().split('T')[0];
             <!-- Modal Header -->
             <div class="flex items-center justify-between mb-4">
                 <h2 class="text-xl font-semibold text-gray-900">
-                    {{ language.add_new || 'Add New' }} {{ language.student || 'Student' }}
+                    {{ editingStudent ? (language.edit || 'Edit') : (language.add_new || 'Add New') }} {{ language.student || 'Student' }}
                 </h2>
                 <button
                     @click="closeModal"
@@ -186,6 +233,7 @@ const minDateString = minDate.toISOString().split('T')[0];
                         </svg>
                         <span class="text-sm font-medium text-blue-900">{{ language.student_id || 'Student ID' }}:</span>
                         <span class="text-sm font-mono text-blue-800 bg-white px-2 py-1 rounded border">{{ studentId }}</span>
+                        <span v-if="editingStudent" class="text-xs text-blue-600">(Read-only)</span>
                     </div>
                 </div>
 
@@ -356,8 +404,23 @@ const minDateString = minDate.toISOString().split('T')[0];
                      <InputError :message="form.errors.notes" class="mt-2" />
                  </div>
 
+                <!-- Status Selection -->
+                <div v-if="editingStudent">
+                    <InputLabel for="status" value="Status" class="mb-2" />
+                    <select
+                        id="status"
+                        v-model="form.status"
+                        class="w-full border-gray-300 focus:border-purple-500 focus:ring-purple-500 rounded-lg shadow-sm"
+                    >
+                        <option value="active">Active</option>
+                        <option value="inactive">Inactive</option>
+                        <option value="suspended">Suspended</option>
+                    </select>
+                    <InputError :message="form.errors.status" class="mt-2" />
+                </div>
+
                 <!-- Password Notice -->
-                <div class="bg-yellow-50 border border-yellow-200 rounded-lg p-3">
+                <div v-if="!editingStudent" class="bg-yellow-50 border border-yellow-200 rounded-lg p-3">
                     <div class="flex items-start gap-2">
                         <svg class="w-5 h-5 text-yellow-600 mt-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path>
@@ -380,7 +443,7 @@ const minDateString = minDate.toISOString().split('T')[0];
                         :disabled="form.processing"
                         class="bg-purple-600 hover:bg-purple-700 focus:ring-purple-500"
                     >
-                        {{ form.processing ? (language.creating || 'Creating...') : (language.create_student || 'Create Student') }}
+                        {{ form.processing ? (editingStudent ? (language.updating || 'Updating...') : (language.creating || 'Creating...')) : (editingStudent ? (language.update_student || 'Update Student') : (language.create_student || 'Create Student')) }}
                     </PrimaryButton>
                 </div>
             </form>

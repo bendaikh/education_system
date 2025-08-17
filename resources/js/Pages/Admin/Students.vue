@@ -3,6 +3,7 @@ import AdminLayout from '@/Layouts/AdminLayout.vue';
 import { Head, usePage, router } from '@inertiajs/vue3';
 import { ref, computed } from 'vue';
 import StudentModal from '@/Components/StudentModal.vue';
+import ImportModal from '@/Components/ImportModal.vue';
 
 const page = usePage();
 const language = computed(() => page.props.language || {});
@@ -44,19 +45,89 @@ const paginatedStudents = computed(() => {
 
 // Modal state
 const showStudentModal = ref(false);
+const showImportModal = ref(false);
+const editingStudent = ref(null);
 
 // Functions to handle modal
 const openStudentModal = () => {
+  editingStudent.value = null;
   showStudentModal.value = true;
 };
 
 const closeStudentModal = () => {
   showStudentModal.value = false;
+  editingStudent.value = null;
+};
+
+const openImportModal = () => {
+  showImportModal.value = true;
+};
+
+const closeImportModal = () => {
+  showImportModal.value = false;
+};
+
+// Edit student
+const editStudent = async (student) => {
+  try {
+    const response = await fetch(`/admin/students/${student.id}/edit`);
+    const data = await response.json();
+    editingStudent.value = data.student;
+    showStudentModal.value = true;
+  } catch (error) {
+    console.error('Error fetching student data:', error);
+  }
+};
+
+// Delete student
+const deleteStudent = (student) => {
+  if (confirm(`Are you sure you want to delete ${student.name}? This action cannot be undone.`)) {
+    router.delete(`/admin/students/${student.id}`, {
+      onSuccess: () => {
+        // Refresh the page to show updated data
+        router.visit('/admin/students', {
+          preserveState: false,
+          preserveScroll: false,
+          replace: true
+        });
+      },
+      onError: (errors) => {
+        console.error('Error deleting student:', errors);
+      }
+    });
+  }
 };
 
 // Handle student creation success
 const handleStudentCreated = () => {
   showStudentModal.value = false;
+  // Reset pagination to first page
+  currentPage.value = 1;
+  // Use Inertia router to reload the page with fresh data
+  router.visit('/admin/students', {
+    preserveState: false,
+    preserveScroll: false,
+    replace: true
+  });
+};
+
+// Handle import success
+const handleImportSuccess = () => {
+  showImportModal.value = false;
+  // Reset pagination to first page
+  currentPage.value = 1;
+  // Use Inertia router to reload the page with fresh data
+  router.visit('/admin/students', {
+    preserveState: false,
+    preserveScroll: false,
+    replace: true
+  });
+};
+
+// Handle student update success
+const handleStudentUpdated = () => {
+  showStudentModal.value = false;
+  editingStudent.value = null;
   // Reset pagination to first page
   currentPage.value = 1;
   // Use Inertia router to reload the page with fresh data
@@ -96,7 +167,18 @@ const nextPage = () => {
     <Head :title="language.students || 'Students'" />
 
     <!-- Add New Student Button -->
-    <div class="flex justify-end mb-6">
+    <div class="flex justify-end gap-3 mb-6">
+      <!-- Import Button -->
+      <button 
+        @click="openImportModal"
+        class="inline-flex items-center gap-2 bg-gradient-to-r from-green-500 to-emerald-600 text-white px-4 py-2 rounded-xl font-medium hover:from-green-600 hover:to-emerald-700 transition-all duration-200 shadow-lg hover:shadow-xl min-h-[44px]">
+        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M9 19l3 3m0 0l3-3m-3 3V10"></path>
+        </svg>
+        {{ language.import || 'Import' }} {{ language.students || 'Students' }}
+      </button>
+      
+      <!-- Add New Student Button -->
       <button 
         @click="openStudentModal"
         class="inline-flex items-center gap-2 bg-gradient-to-r from-blue-500 to-purple-600 text-white px-4 py-2 rounded-xl font-medium hover:from-blue-600 hover:to-purple-700 transition-all duration-200 shadow-lg hover:shadow-xl min-h-[44px]">
@@ -174,13 +256,21 @@ const nextPage = () => {
               <td class="py-4 px-6">
                 <div class="flex items-center gap-3">
                   <!-- Edit Button -->
-                  <button class="text-blue-600 hover:text-blue-800 transition-colors duration-200">
+                  <button 
+                    @click="editStudent(student)"
+                    class="text-blue-600 hover:text-blue-800 transition-colors duration-200"
+                    :title="language.edit || 'Edit'"
+                  >
                     <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                       <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"></path>
                     </svg>
                   </button>
                   <!-- Delete Button -->
-                  <button class="text-red-600 hover:text-red-800 transition-colors duration-200">
+                  <button 
+                    @click="deleteStudent(student)"
+                    class="text-red-600 hover:text-red-800 transition-colors duration-200"
+                    :title="language.delete || 'Delete'"
+                  >
                     <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                       <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"></path>
                     </svg>
@@ -202,13 +292,21 @@ const nextPage = () => {
             </div>
             <div class="flex items-center gap-2 ml-3">
               <!-- Edit Button -->
-              <button class="p-2 text-blue-600 hover:bg-blue-50 rounded-lg transition-colors duration-200 min-h-[44px] min-w-[44px] flex items-center justify-center">
+              <button 
+                @click="editStudent(student)"
+                class="p-2 text-blue-600 hover:bg-blue-50 rounded-lg transition-colors duration-200 min-h-[44px] min-w-[44px] flex items-center justify-center"
+                :title="language.edit || 'Edit'"
+              >
                 <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"></path>
                 </svg>
               </button>
               <!-- Delete Button -->
-              <button class="p-2 text-red-600 hover:bg-red-50 rounded-lg transition-colors duration-200 min-h-[44px] min-w-[44px] flex items-center justify-center">
+              <button 
+                @click="deleteStudent(student)"
+                class="p-2 text-red-600 hover:bg-red-50 rounded-lg transition-colors duration-200 min-h-[44px] min-w-[44px] flex items-center justify-center"
+                :title="language.delete || 'Delete'"
+              >
                 <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"></path>
                 </svg>
@@ -286,8 +384,17 @@ const nextPage = () => {
     <StudentModal 
       :show="showStudentModal"
       :formations="formations"
+      :editing-student="editingStudent"
       @close="closeStudentModal"
       @student-created="handleStudentCreated"
+      @student-updated="handleStudentUpdated"
+    />
+
+    <!-- Import Modal -->
+    <ImportModal 
+      :show="showImportModal"
+      @close="closeImportModal"
+      @imported="handleImportSuccess"
     />
   </AdminLayout>
 </template>
