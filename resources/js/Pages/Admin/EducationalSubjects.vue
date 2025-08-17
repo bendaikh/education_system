@@ -56,7 +56,7 @@
                                     {{ subject.duration === 'monthly' ? language.monthly : language.yearly }}
                                 </td>
                                 <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
-                                    {{ subject.price }}
+                                    {{ formatPrice(subject.price) }}
                                 </td>
                                 <td class="px-6 py-4 text-sm text-gray-500">
                                     <div class="flex flex-wrap gap-1">
@@ -284,12 +284,15 @@
 import { ref, reactive, computed } from 'vue';
 import { router } from '@inertiajs/vue3';
 import AdminLayout from '@/Layouts/AdminLayout.vue';
+import { useCurrency } from '@/Composables/useCurrency.js';
 
 const props = defineProps({
     subjects: Array,
     teachers: Array,
     language: Object
 });
+
+const { formatPrice } = useCurrency();
 
 const showCreateModal = ref(false);
 const showEditModal = ref(false);

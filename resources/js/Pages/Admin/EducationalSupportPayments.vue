@@ -51,7 +51,7 @@
                                 <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
                                     <div class="space-y-1">
                                         <div class="flex items-center gap-2">
-                                            <span class="font-medium">${{ payment.amount }}</span>
+                                            <span class="font-medium">{{ formatPrice(payment.amount) }}</span>
                                             <button
                                                 @click="openAmountModal(payment)"
                                                 class="text-blue-600 hover:text-blue-900 transition-colors"
@@ -63,8 +63,8 @@
                                             </button>
                                         </div>
                                         <div v-if="payment.paid_amount > 0" class="text-xs">
-                                            <span class="text-green-600">Paid: ${{ payment.paid_amount }}</span>
-                                            <span v-if="getRemainingBalance(payment) > 0" class="text-red-600 ml-2">Remaining: ${{ getRemainingBalance(payment) }}</span>
+                                            <span class="text-green-600">Paid: {{ formatPrice(payment.paid_amount) }}</span>
+                                            <span v-if="getRemainingBalance(payment) > 0" class="text-red-600 ml-2">Remaining: {{ formatPrice(getRemainingBalance(payment)) }}</span>
                                         </div>
                                     </div>
                                 </td>
@@ -219,15 +219,15 @@
                                     </div>
                                     <div class="flex justify-between">
                                         <span class="text-sm font-medium text-gray-700">{{ language.total_amount }}:</span>
-                                        <span class="text-sm font-bold text-gray-900">${{ selectedPayment?.amount }}</span>
+                                        <span class="text-sm font-bold text-gray-900">{{ formatPrice(selectedPayment?.amount) }}</span>
                                     </div>
                                     <div v-if="selectedPayment?.paid_amount > 0" class="flex justify-between">
                                         <span class="text-sm font-medium text-gray-700">{{ language.paid_amount }}:</span>
-                                        <span class="text-sm text-green-600">${{ selectedPayment?.paid_amount }}</span>
+                                        <span class="text-sm text-green-600">{{ formatPrice(selectedPayment?.paid_amount) }}</span>
                                     </div>
                                     <div v-if="getRemainingBalance(selectedPayment) > 0" class="flex justify-between">
                                         <span class="text-sm font-medium text-gray-700">{{ language.remaining_balance }}:</span>
-                                        <span class="text-sm text-red-600">${{ getRemainingBalance(selectedPayment) }}</span>
+                                        <span class="text-sm text-red-600">{{ formatPrice(getRemainingBalance(selectedPayment)) }}</span>
                                     </div>
                                 </div>
 
@@ -248,7 +248,7 @@
                                             placeholder="0.00"
                                         />
                                         <p class="text-xs text-gray-500 mt-1">
-                                            {{ language.max_amount }}: ${{ getRemainingBalance(selectedPayment) }}
+                                            {{ language.max_amount }}: {{ formatPrice(getRemainingBalance(selectedPayment)) }}
                                         </p>
                                     </div>
                                 </form>
@@ -277,11 +277,14 @@
 import { ref, reactive } from 'vue';
 import { router } from '@inertiajs/vue3';
 import AdminLayout from '@/Layouts/AdminLayout.vue';
+import { useCurrency } from '@/Composables/useCurrency.js';
 
 const props = defineProps({
     payments: Array,
     language: Object
 });
+
+const { formatPrice } = useCurrency();
 
 const showAmountModal = ref(false);
 const showPaymentModal = ref(false);
