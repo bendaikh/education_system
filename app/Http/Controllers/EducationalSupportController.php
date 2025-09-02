@@ -34,6 +34,7 @@ class EducationalSupportController extends Controller
         $request->validate([
             'student_id' => 'required|exists:students,id',
             'educational_subject_id' => 'required|exists:educational_subjects,id',
+            'start_date' => 'required|date',
             'status' => 'required|in:active,completed,cancelled',
             'notes' => 'nullable|string'
         ]);
@@ -41,8 +42,8 @@ class EducationalSupportController extends Controller
         // Get the subject to determine duration
         $subject = EducationalSubject::find($request->educational_subject_id);
         
-        // Calculate dates automatically
-        $startDate = Carbon::now()->startOfDay();
+        // Calculate dates automatically using chosen start date
+        $startDate = Carbon::parse($request->start_date)->startOfDay();
         $endDate = $subject->duration === 'monthly' 
             ? $startDate->copy()->addMonth() 
             : $startDate->copy()->addYear();
@@ -73,6 +74,7 @@ class EducationalSupportController extends Controller
         $request->validate([
             'student_id' => 'required|exists:students,id',
             'educational_subject_id' => 'required|exists:educational_subjects,id',
+            'start_date' => 'required|date',
             'status' => 'required|in:active,completed,cancelled',
             'notes' => 'nullable|string'
         ]);
@@ -80,17 +82,13 @@ class EducationalSupportController extends Controller
         // Get the subject to determine duration
         $subject = EducationalSubject::find($request->educational_subject_id);
         
-        // Calculate dates automatically (only if subject changed)
-        $startDate = $subscription->start_date;
+        // Calculate dates automatically if subject or start date changed
+        $startDate = Carbon::parse($request->start_date)->startOfDay();
         $endDate = $subscription->end_date;
-        
-        if ($request->educational_subject_id !== $subscription->educational_subject_id) {
-            // Subject changed, recalculate dates
-            $startDate = Carbon::now()->startOfDay();
-            $endDate = $subject->duration === 'monthly' 
-                ? $startDate->copy()->addMonth() 
-                : $startDate->copy()->addYear();
-        }
+        // Recalculate end date based on provided start date and subject duration
+        $endDate = $subject->duration === 'monthly' 
+            ? $startDate->copy()->addMonth() 
+            : $startDate->copy()->addYear();
 
         $subscription->update([
             'student_id' => $request->student_id,

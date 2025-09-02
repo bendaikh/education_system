@@ -8,6 +8,8 @@ use App\Http\Controllers\TeacherController;
 use App\Http\Controllers\PaymentController;
 use App\Http\Controllers\SubscriptionController;
 use App\Http\Controllers\FormationController;
+use App\Http\Controllers\FormationSubscriptionController;
+use App\Http\Controllers\FormationPaymentController;
 use App\Http\Controllers\EducationalSubjectController;
 use App\Http\Controllers\EducationalSupportController;
 use App\Http\Controllers\EducationalSupportPaymentController;
@@ -57,7 +59,21 @@ Route::middleware(['auth', 'verified'])->prefix('admin')->name('admin.')->group(
    Route::get('/subscriptions/types', [SubscriptionController::class, 'typesIndex'])->name('subscriptions.types.index');
    Route::post('/subscriptions/types', [SubscriptionController::class, 'storeType'])->name('subscriptions.types.store');
    Route::get('/formations', [FormationController::class, 'index'])->name('formations.index');
+   Route::inertia('/formation-management', 'Admin/ManageFormation')->name('formation.management');
    Route::post('/formations', [FormationController::class, 'store'])->name('formations.store');
+   Route::put('/formations/{formation}', [FormationController::class, 'update'])->name('formations.update');
+   Route::delete('/formations/{formation}', [FormationController::class, 'destroy'])->name('formations.destroy');
+   // Formation-specific subscriptions
+   Route::get('/formation-subscriptions', [FormationSubscriptionController::class, 'index'])->name('formation-subscriptions.index');
+   Route::post('/formation-subscriptions', [FormationSubscriptionController::class, 'store'])->name('formation-subscriptions.store');
+   Route::put('/formation-subscriptions/{subscription}', [FormationSubscriptionController::class, 'update'])->name('formation-subscriptions.update');
+   Route::delete('/formation-subscriptions/{subscription}', [FormationSubscriptionController::class, 'destroy'])->name('formation-subscriptions.destroy');
+   // Formation-specific payments
+   Route::get('/formation-payments', [FormationPaymentController::class, 'index'])->name('formation-payments.index');
+   Route::patch('/formation-payments/{payment}/mark-as-paid', [FormationPaymentController::class, 'markAsPaid'])->name('formation-payments.mark-as-paid');
+   Route::patch('/formation-payments/{payment}/process-payment', [FormationPaymentController::class, 'processPayment'])->name('formation-payments.process-payment');
+   Route::patch('/formation-payments/{payment}/mark-as-cancelled', [FormationPaymentController::class, 'markAsCancelled'])->name('formation-payments.mark-as-cancelled');
+   Route::patch('/formation-payments/{payment}/update-amount', [FormationPaymentController::class, 'updateAmount'])->name('formation-payments.update-amount');
    Route::get('/educational-subjects', [EducationalSubjectController::class, 'index'])->name('educational-subjects.index');
    Route::post('/educational-subjects', [EducationalSubjectController::class, 'store'])->name('educational-subjects.store');
    Route::put('/educational-subjects/{subject}', [EducationalSubjectController::class, 'update'])->name('educational-subjects.update');

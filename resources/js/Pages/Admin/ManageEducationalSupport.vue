@@ -177,22 +177,22 @@
                                         </select>
                                     </div>
 
-                                    <!-- Calculated Dates Preview -->
+                                    <!-- Start Date Picker and Calculated End Date -->
                                     <div v-if="form.educational_subject_id && selectedSubject" class="bg-blue-50 border border-blue-200 rounded-md p-4">
                                         <h4 class="text-sm font-medium text-blue-900 mb-2">{{ language.calculated_dates }}</h4>
-                                        <div class="space-y-2 text-sm">
-                                            <div class="flex justify-between">
-                                                <span class="text-blue-700">{{ language.start_date }}:</span>
-                                                <span class="text-blue-900 font-medium">{{ formatDate(calculatedStartDate) }}</span>
+                                        <div class="grid grid-cols-1 md:grid-cols-2 gap-4 text-sm">
+                                            <div>
+                                                <label class="block text-xs text-blue-700 mb-1">{{ language.start_date }}</label>
+                                                <input type="date" v-model="form.start_date" class="w-full border rounded-md px-3 py-2" />
                                             </div>
-                                            <div class="flex justify-between">
-                                                <span class="text-blue-700">{{ language.end_date }}:</span>
-                                                <span class="text-blue-900 font-medium">{{ formatDate(calculatedEndDate) }}</span>
+                                            <div>
+                                                <label class="block text-xs text-blue-700 mb-1">{{ language.end_date }}</label>
+                                                <input type="date" :value="calculatedEndDate" class="w-full border rounded-md px-3 py-2 bg-gray-100" readonly />
                                             </div>
-                                            <div class="flex justify-between">
-                                                <span class="text-blue-700">{{ language.duration }}:</span>
-                                                <span class="text-blue-900 font-medium">{{ selectedSubject.duration === 'monthly' ? language.monthly : language.yearly }}</span>
-                                            </div>
+                                        </div>
+                                        <div class="mt-3 text-sm">
+                                            <span class="text-blue-700">{{ language.duration }}:</span>
+                                            <span class="text-blue-900 font-medium">{{ selectedSubject.duration === 'monthly' ? language.monthly : language.yearly }}</span>
                                         </div>
                                     </div>
 
@@ -265,6 +265,7 @@ const editingSubscription = ref(null);
 const form = reactive({
     student_id: '',
     educational_subject_id: '',
+    start_date: '',
     status: 'active',
     notes: ''
 });
@@ -275,14 +276,10 @@ const selectedSubject = computed(() => {
     return props.subjects.find(subject => subject.id == form.educational_subject_id);
 });
 
-const calculatedStartDate = computed(() => {
-    return new Date().toISOString().split('T')[0];
-});
-
 const calculatedEndDate = computed(() => {
     if (!selectedSubject.value) return null;
     
-    const startDate = new Date();
+    const startDate = form.start_date ? new Date(form.start_date) : new Date();
     if (selectedSubject.value.duration === 'monthly') {
         startDate.setMonth(startDate.getMonth() + 1);
     } else {
