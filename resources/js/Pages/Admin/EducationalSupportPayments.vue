@@ -366,7 +366,15 @@ const getRemainingBalance = (payment) => {
 
 const formatDate = (date) => {
     if (!date) return '-';
-    return new Date(date).toLocaleDateString();
+    const value = typeof date === 'string' ? date : String(date);
+    // Normalize to the first 10 chars (YYYY-MM-DD) to avoid timezone shifts
+    const isoPrefix = value.substring(0, 10); // e.g., 2025-09-02 from 2025-09-02T00:00:00.000000Z
+    const ymd = /^\d{4}-\d{2}-\d{2}$/;
+    if (ymd.test(isoPrefix)) {
+        const [y, m, d] = isoPrefix.split('-');
+        return `${Number(m)}/${Number(d)}/${y}`;
+    }
+    return new Date(value).toLocaleDateString();
 };
 
 const getPaymentStatusClass = (status) => {

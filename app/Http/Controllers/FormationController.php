@@ -69,4 +69,43 @@ class FormationController extends Controller
 
         return redirect()->route('admin.formations.index')->with('success', 'Formation created successfully!');
     }
+
+    /**
+     * Update an existing formation.
+     */
+    public function update(Request $request, Formation $formation)
+    {
+        $validated = $request->validate([
+            'title' => 'required|string|max:255',
+            'description' => 'required|string',
+            'teachers' => 'required|array|min:1',
+            'teachers.*.id' => 'required|integer',
+            'teachers.*.name' => 'required|string',
+            'duration' => 'nullable|string',
+            'level' => 'nullable|string',
+            'price' => 'required|string',
+            'status' => 'required|string|in:Active,Coming Soon,Completed'
+        ]);
+
+        $formation->update([
+            'title' => $validated['title'],
+            'description' => $validated['description'],
+            'teachers' => array_column($validated['teachers'], 'name'),
+            'duration' => $validated['duration'],
+            'level' => $validated['level'],
+            'price' => $validated['price'],
+            'status' => $validated['status'],
+        ]);
+
+        return redirect()->route('admin.formations.index')->with('success', 'Formation updated successfully!');
+    }
+
+    /**
+     * Remove the specified formation.
+     */
+    public function destroy(Formation $formation)
+    {
+        $formation->delete();
+        return redirect()->route('admin.formations.index')->with('success', 'Formation deleted successfully!');
+    }
 }

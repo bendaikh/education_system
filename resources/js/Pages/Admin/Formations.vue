@@ -25,6 +25,19 @@ const formations = computed(() => props.formations || []);
 
 // Modal state
 const showModal = ref(false);
+const isEditing = ref(false);
+const currentFormationId = ref(null);
+const showDeleteModal = ref(false);
+const deleteTargetId = ref(null);
+
+// Toast notification state
+const showToast = ref(false);
+const toastMessage = ref('');
+const showSuccessToast = (message) => {
+  toastMessage.value = message;
+  showToast.value = true;
+  setTimeout(() => { showToast.value = false; }, 3000);
+};
 
 // Form data
 const formData = ref({
@@ -76,8 +89,34 @@ const removeTeacher = (teacher) => {
 
 // Form functions
 const openModal = () => {
+  isEditing.value = false;
+  currentFormationId.value = null;
   showModal.value = true;
   resetForm();
+};
+
+const openEditModal = (formation) => {
+  isEditing.value = true;
+  currentFormationId.value = formation.id;
+  showModal.value = true;
+  // Prefill form
+  formData.value = {
+    title: formation.title || '',
+    description: formation.description || '',
+    // We only stored teacher names in DB; map them to objects for UI chips
+    teachers: Array.isArray(formation.teachers)
+      ? formation.teachers.map((name, idx) => ({ id: idx + 1, name }))
+      : (formation.teachers ? [{ id: 1, name: formation.teachers }] : []),
+    duration: formation.duration || '',
+    level: formation.level || '',
+    price: formation.price || '',
+    status: formation.status || 'Active',
+  };
+};
+
+const openDeleteModal = (formation) => {
+  deleteTargetId.value = formation.id;
+  showDeleteModal.value = true;
 };
 
 const closeModal = () => {
@@ -106,15 +145,45 @@ const submitForm = () => {
     return;
   }
 
-  // Submit form using Inertia
-  router.post('/admin/formations', formData.value, {
+  // Normalize teachers to array of objects with name, then map to backend expectation
+  const payload = {
+    ...formData.value,
+    teachers: formData.value.teachers.map(t => ({ id: t.id ?? 0, name: t.name ?? t })),
+  };
+
+  if (isEditing.value && currentFormationId.value) {
+    router.put(`/admin/formations/${currentFormationId.value}`, payload, {
+      onSuccess: () => {
+        closeModal();
+        showSuccessToast('Formation updated successfully');
+      },
+      onError: (errors) => {
+        console.error('Form submission errors:', errors);
+        alert('Error updating formation. Please check your input.');
+      }
+    });
+  } else {
+    // Create
+    router.post('/admin/formations', payload, {
+      onSuccess: () => {
+        closeModal();
+        showSuccessToast('Formation created successfully');
+      },
+      onError: (errors) => {
+        console.error('Form submission errors:', errors);
+        alert('Error creating formation. Please check your input.');
+      }
+    });
+  }
+};
+
+const confirmDelete = () => {
+  if (!deleteTargetId.value) return;
+  router.delete(`/admin/formations/${deleteTargetId.value}`, {
     onSuccess: () => {
-      closeModal();
-      // The page will automatically refresh with the new formation
-    },
-    onError: (errors) => {
-      console.error('Form submission errors:', errors);
-      alert('Error creating formation. Please check your input.');
+      showDeleteModal.value = false;
+      deleteTargetId.value = null;
+      showSuccessToast('Formation deleted successfully');
     }
   });
 };
@@ -312,13 +381,13 @@ const getLevelClass = (level) => {
                     </svg>
                   </button>
                   <!-- Edit Button -->
-                  <button class="text-blue-600 hover:text-blue-800 transition-colors duration-200" title="Edit Formation">
+                  <button @click="openEditModal(formation)" class="text-blue-600 hover:text-blue-800 transition-colors duration-200" title="Edit Formation">
                     <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                       <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"></path>
                     </svg>
                   </button>
                   <!-- Delete Button -->
-                  <button class="text-red-600 hover:text-red-800 transition-colors duration-200" title="Delete Formation">
+                  <button @click="openDeleteModal(formation)" class="text-red-600 hover:text-red-800 transition-colors duration-200" title="Delete Formation">
                     <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                       <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"></path>
                     </svg>
@@ -469,7 +538,7 @@ const getLevelClass = (level) => {
               <div class="w-full">
                 <div class="flex items-center justify-between mb-4">
                   <h3 class="text-lg leading-6 font-medium text-gray-900" id="modal-title">
-                    {{ language.add_new || 'Add New' }} {{ language.formations || 'Formation' }}
+                    {{ isEditing ? (language.edit || 'Edit') : (language.add_new || 'Add New') }} {{ language.formations || 'Formation' }}
                   </h3>
                   <button @click="closeModal" class="text-gray-400 hover:text-gray-600">
                     <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -622,6 +691,47 @@ const getLevelClass = (level) => {
                     class="mt-3 w-full inline-flex justify-center rounded-md border border-gray-300 shadow-sm px-4 py-2 bg-white text-base font-medium text-gray-700 hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 sm:mt-0 sm:ml-3 sm:w-auto sm:text-sm">
               {{ language.cancel || 'Cancel' }}
             </button>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Success Toast Notification -->
+    <Transition
+      enter-active-class="transition ease-out duration-300"
+      enter-from-class="translate-y-2 opacity-0 sm:translate-y-0 sm:translate-x-2"
+      enter-to-class="translate-y-0 opacity-100 sm:translate-x-0"
+      leave-active-class="transition ease-in duration-100"
+      leave-from-class="opacity-100"
+      leave-to-class="opacity-0"
+    >
+      <div v-if="showToast" class="fixed bottom-4 right-4 z-50">
+        <div class="bg-green-500 text-white px-6 py-3 rounded-lg shadow-lg flex items-center gap-3 max-w-md">
+          <svg class="w-5 h-5 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path>
+          </svg>
+          <span class="text-sm font-medium">{{ toastMessage }}</span>
+          <button @click="showToast = false" class="ml-2 text-green-200 hover:text-white">
+            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
+            </svg>
+          </button>
+        </div>
+      </div>
+    </Transition>
+
+    <!-- Delete Confirmation Modal -->
+    <div v-if="showDeleteModal" class="fixed inset-0 z-50 overflow-y-auto" role="dialog" aria-modal="true">
+      <div class="flex items-end justify-center min-h-screen pt-4 px-4 pb-20 text-center sm:block sm:p-0">
+        <div class="fixed inset-0 bg-gray-500 bg-opacity-75 transition-opacity" @click="showDeleteModal = false"></div>
+        <div class="inline-block align-bottom bg-white rounded-lg text-left overflow-hidden shadow-xl transform transition-all sm:my-8 sm:align-middle sm:max-w-md sm:w-full">
+          <div class="bg-white px-4 pt-5 pb-4 sm:p-6 sm:pb-4">
+            <h3 class="text-lg leading-6 font-medium text-gray-900 mb-2">Delete Formation</h3>
+            <p class="text-sm text-gray-600">Are you sure you want to delete this formation? This action cannot be undone.</p>
+          </div>
+          <div class="bg-gray-50 px-4 py-3 sm:px-6 sm:flex sm:flex-row-reverse">
+            <button @click="confirmDelete" type="button" class="w-full inline-flex justify-center rounded-md border border-transparent shadow-sm px-4 py-2 bg-red-600 text-base font-medium text-white hover:bg-red-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-red-500 sm:ml-3 sm:w-auto sm:text-sm">Delete</button>
+            <button @click="showDeleteModal = false" type="button" class="mt-3 w-full inline-flex justify-center rounded-md border border-gray-300 shadow-sm px-4 py-2 bg-white text-base font-medium text-gray-700 hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 sm:mt-0 sm:ml-3 sm:w-auto sm:text-sm">Cancel</button>
           </div>
         </div>
       </div>
