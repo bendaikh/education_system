@@ -3,7 +3,6 @@
 return [
     // Navigation
     'dashboard' => 'Tableau de bord',
-    'classes' => 'Classes',
     'students' => 'Étudiants',
     'teachers' => 'Enseignants',
     'admins' => 'Administrateurs',
@@ -16,6 +15,10 @@ return [
     'educational_subjects' => 'Matières Éducatives',
     'manage_educational_support' => 'Gérer les Abonnements de Support Éducatif',
     'educational_support_payments' => 'Paiements',
+    'childhood_education' => 'Éducation de l\'Enfance',
+    'childhood_subjects' => 'Matières de l\'Enfance',
+    'childhood_subscriptions' => 'Abonnements de l\'Enfance',
+    'childhood_payments' => 'Paiements de l\'Enfance',
     'user_management' => 'Gestion des utilisateurs',
     'settings' => 'Paramètres',
     'logout' => 'Déconnexion',
@@ -98,6 +101,7 @@ return [
     'close' => 'Fermer',
     'select_student' => 'Sélectionner un étudiant',
     'select_subject' => 'Sélectionner une matière',
+    'select_duration' => 'Sélectionner la durée',
     'duration' => 'Durée',
     'monthly' => 'Mensuel',
     'yearly' => 'Annuel',

@@ -9,6 +9,10 @@ const props = defineProps({
 const page = usePage();
 const isAuthenticated = computed(() => !!page.props.auth?.user);
 
+// Flash message handling
+const flash = computed(() => page.props.flash);
+const showFlashMessage = computed(() => flash.value && (flash.value.success || flash.value.error));
+
 // Language switching
 const currentLocale = ref(page.props.locale || 'en');
 
@@ -78,7 +82,6 @@ const navItems = computed(() => {
     const language = page.props.language || {};
     return [
         { label: language.dashboard || 'Dashboard', href: '/admin/dashboard' },
-        { label: language.classes || 'Classes', href: '/admin/classes' },
         { label: language.students || 'Students', href: '/admin/students' },
         { label: language.teachers || 'Teachers', href: '/admin/teachers' },
         { 
@@ -108,6 +111,16 @@ const navItems = computed(() => {
                 { label: (language.formations || 'Formations') + ' Subjects', href: '/admin/formations' },
                 { label: (language.subscriptions || 'Subscriptions'), href: '/admin/formation-subscriptions' },
                 { label: (language.payments || 'Payments'), href: '/admin/formation-payments' },
+            ]
+        },
+        { 
+            label: language.childhood_education || 'Childhood Education', 
+            key: 'childhood_education',
+            hasSubmenu: true,
+            subitems: [
+                { label: language.childhood_subjects || 'Childhood Subjects', href: '/admin/childhood-subjects' },
+                { label: language.childhood_subscriptions || 'Childhood Subscriptions', href: '/admin/childhood-subscriptions' },
+                { label: language.childhood_payments || 'Childhood Payments', href: '/admin/childhood-payments' },
             ]
         },
         { label: language.payments || 'Payments', href: '/admin/payments' },
@@ -235,10 +248,6 @@ const navItems = computed(() => {
                                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 7v10a2 2 0 002 2h14a2 2 0 002-2V9a2 2 0 00-2-2H5a2 2 0 00-2-2z"></path>
                                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 5a2 2 0 012-2h4a2 2 0 012 2v6a2 2 0 01-2 2H10a2 2 0 01-2-2V5z"></path>
                                     </svg>
-                                    <!-- Classes Icon -->
-                                    <svg v-else-if="item.href === '/admin/classes'" class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18.477 18.246 18 16.5 18c-1.746 0-3.332.477-4.5 1.253"></path>
-                                    </svg>
                                     <!-- Students Icon -->
                                     <svg v-else-if="item.href === '/admin/students'" class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197m13.5-9a2.5 2.5 0 11-5 0 2.5 2.5 0 015 0z"></path>
@@ -288,6 +297,10 @@ const navItems = computed(() => {
                                             <svg v-else-if="item.key === 'formations'" class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 14l9-5-9-5-9 5 9 5z"></path>
                                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 14l6.16-3.422a12.083 12.083 0 01.665 6.479A11.952 11.952 0 0012 20.055a11.952 11.952 0 00-6.824-2.998 12.078 12.078 0 01-.665-6.479L12 14z"></path>
+                                            </svg>
+                                            <!-- Childhood Education Icon -->
+                                            <svg v-else-if="item.key === 'childhood_education'" class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18.477 18.246 18 16.5 18c-1.746 0-3.332.477-4.5 1.253"></path>
                                             </svg>
                                         </div>
                                         <span class="font-medium">{{ item.label }}</span>
@@ -386,6 +399,40 @@ const navItems = computed(() => {
                     sidebarOpen ? 'lg:max-w-[calc(100%-320px)]' : 'lg:max-w-full'
                 ]"
             >
+                <!-- Flash Messages -->
+                <div v-if="showFlashMessage" class="mb-6">
+                    <div 
+                        v-if="flash.success"
+                        class="bg-green-50 border border-green-200 rounded-md p-4"
+                    >
+                        <div class="flex">
+                            <div class="flex-shrink-0">
+                                <svg class="h-5 w-5 text-green-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path>
+                                </svg>
+                            </div>
+                            <div class="ml-3">
+                                <p class="text-sm font-medium text-green-800">{{ flash.success }}</p>
+                            </div>
+                        </div>
+                    </div>
+                    <div 
+                        v-if="flash.error"
+                        class="bg-red-50 border border-red-200 rounded-md p-4"
+                    >
+                        <div class="flex">
+                            <div class="flex-shrink-0">
+                                <svg class="h-5 w-5 text-red-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
+                                </svg>
+                            </div>
+                            <div class="ml-3">
+                                <p class="text-sm font-medium text-red-800">{{ flash.error }}</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                
                 <slot />
             </main>
         </div>
