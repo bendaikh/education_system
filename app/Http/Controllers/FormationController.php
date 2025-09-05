@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use Illuminate\Http\Request;
 use Inertia\Inertia;
 use App\Models\Formation;
+use App\Models\Teacher;
 
 class FormationController extends Controller
 {
@@ -13,19 +14,8 @@ class FormationController extends Controller
      */
     public function index()
     {
-        // Available teachers for selection
-        $availableTeachers = [
-            ['id' => 1, 'name' => 'John Smith', 'department' => 'Computer Science'],
-            ['id' => 2, 'name' => 'Sarah Johnson', 'department' => 'Web Development'],
-            ['id' => 3, 'name' => 'Michael Brown', 'department' => 'Database Management'],
-            ['id' => 4, 'name' => 'Emily Davis', 'department' => 'Mobile Development'],
-            ['id' => 5, 'name' => 'David Wilson', 'department' => 'Frontend Development'],
-            ['id' => 6, 'name' => 'Lisa Anderson', 'department' => 'Backend Development'],
-            ['id' => 7, 'name' => 'James Taylor', 'department' => 'DevOps'],
-            ['id' => 8, 'name' => 'Maria Garcia', 'department' => 'UI/UX Design']
-        ];
-
-
+        // Get available teachers from database
+        $availableTeachers = Teacher::select('id', 'name', 'role as department')->get()->toArray();
 
         // Get formations from database
         $formations = Formation::all();
