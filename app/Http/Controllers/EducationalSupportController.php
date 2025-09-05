@@ -42,11 +42,11 @@ class EducationalSupportController extends Controller
         // Get the subject to determine duration
         $subject = EducationalSubject::find($request->educational_subject_id);
         
-        // Calculate dates automatically using chosen start date
-        $startDate = Carbon::parse($request->start_date)->startOfDay();
+        // Use exact start date as provided by user
+        $startDate = $request->start_date;
         $endDate = $subject->duration === 'monthly' 
-            ? $startDate->copy()->addMonth() 
-            : $startDate->copy()->addYear();
+            ? Carbon::parse($request->start_date)->addMonth()->format('Y-m-d')
+            : Carbon::parse($request->start_date)->addYear()->format('Y-m-d');
 
         // Create subscription
         $subscription = EducationalSupportSubscription::create([
@@ -82,13 +82,12 @@ class EducationalSupportController extends Controller
         // Get the subject to determine duration
         $subject = EducationalSubject::find($request->educational_subject_id);
         
-        // Calculate dates automatically if subject or start date changed
-        $startDate = Carbon::parse($request->start_date)->startOfDay();
-        $endDate = $subscription->end_date;
+        // Use exact start date as provided by user
+        $startDate = $request->start_date;
         // Recalculate end date based on provided start date and subject duration
         $endDate = $subject->duration === 'monthly' 
-            ? $startDate->copy()->addMonth() 
-            : $startDate->copy()->addYear();
+            ? Carbon::parse($request->start_date)->addMonth()->format('Y-m-d')
+            : Carbon::parse($request->start_date)->addYear()->format('Y-m-d');
 
         $subscription->update([
             'student_id' => $request->student_id,
