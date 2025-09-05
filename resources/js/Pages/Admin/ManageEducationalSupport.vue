@@ -297,6 +297,7 @@ const editSubscription = (subscription) => {
     editingSubscription.value = subscription;
     form.student_id = subscription.student_id;
     form.educational_subject_id = subscription.educational_subject_id;
+    form.start_date = subscription.start_date; // Include start_date in edit form
     form.status = subscription.status;
     form.notes = subscription.notes || '';
     showEditModal.value = true;
@@ -334,13 +335,15 @@ const closeModal = () => {
 const resetForm = () => {
     form.student_id = '';
     form.educational_subject_id = '';
+    form.start_date = '';
     form.status = 'active';
     form.notes = '';
 };
 
 const formatDate = (date) => {
     if (!date) return '-';
-    return new Date(date).toLocaleDateString();
+    // Extract just the date part (YYYY-MM-DD) from the datetime string
+    return date.split('T')[0];
 };
 
 const getStatusClass = (status) => {
