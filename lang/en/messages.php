@@ -3,7 +3,6 @@
 return [
     // Navigation
     'dashboard' => 'Dashboard',
-    'classes' => 'Classes',
     'students' => 'Students',
     'teachers' => 'Teachers',
     'admins' => 'Admins',
@@ -16,6 +15,10 @@ return [
     'educational_subjects' => 'Educational Subjects',
     'manage_educational_support' => 'Manage Educational Support Subscriptions',
     'educational_support_payments' => 'Payments',
+    'childhood_education' => 'Childhood Education',
+    'childhood_subjects' => 'Childhood Subjects',
+    'childhood_subscriptions' => 'Childhood Subscriptions',
+    'childhood_payments' => 'Childhood Payments',
     'user_management' => 'User Management',
     'settings' => 'Settings',
     'logout' => 'Logout',
@@ -98,6 +101,7 @@ return [
     'close' => 'Close',
     'select_student' => 'Select Student',
     'select_subject' => 'Select Subject',
+    'select_duration' => 'Select Duration',
     'duration' => 'Duration',
     'monthly' => 'Monthly',
     'yearly' => 'Yearly',

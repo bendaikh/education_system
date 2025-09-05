@@ -13,6 +13,9 @@ use App\Http\Controllers\FormationPaymentController;
 use App\Http\Controllers\EducationalSubjectController;
 use App\Http\Controllers\EducationalSupportController;
 use App\Http\Controllers\EducationalSupportPaymentController;
+use App\Http\Controllers\ChildhoodSubjectController;
+use App\Http\Controllers\ChildhoodSubscriptionController;
+use App\Http\Controllers\ChildhoodPaymentController;
 use App\Http\Controllers\LanguageController;
 use App\Http\Controllers\SettingsController;
 use Illuminate\Foundation\Application;
@@ -92,6 +95,23 @@ Route::middleware(['auth', 'verified'])->prefix('admin')->name('admin.')->group(
     Route::patch('/educational-support-payments/{payment}/process-payment', [EducationalSupportPaymentController::class, 'processPayment'])->name('educational-support-payments.process-payment');
     Route::patch('/educational-support-payments/{payment}/mark-as-cancelled', [EducationalSupportPaymentController::class, 'markAsCancelled'])->name('educational-support-payments.mark-as-cancelled');
     Route::patch('/educational-support-payments/{payment}/update-amount', [EducationalSupportPaymentController::class, 'updateAmount'])->name('educational-support-payments.update-amount');
+
+    // Childhood Education Routes
+    Route::get('/childhood-subjects', [ChildhoodSubjectController::class, 'index'])->name('childhood-subjects.index');
+    Route::post('/childhood-subjects', [ChildhoodSubjectController::class, 'store'])->name('childhood-subjects.store');
+    Route::put('/childhood-subjects/{subject}', [ChildhoodSubjectController::class, 'update'])->name('childhood-subjects.update');
+    Route::delete('/childhood-subjects/{subject}', [ChildhoodSubjectController::class, 'destroy'])->name('childhood-subjects.destroy');
+    
+    Route::get('/childhood-subscriptions', [ChildhoodSubscriptionController::class, 'index'])->name('childhood-subscriptions.index');
+    Route::post('/childhood-subscriptions', [ChildhoodSubscriptionController::class, 'store'])->name('childhood-subscriptions.store');
+    Route::put('/childhood-subscriptions/{subscription}', [ChildhoodSubscriptionController::class, 'update'])->name('childhood-subscriptions.update');
+    Route::delete('/childhood-subscriptions/{subscription}', [ChildhoodSubscriptionController::class, 'destroy'])->name('childhood-subscriptions.destroy');
+    
+    Route::get('/childhood-payments', [ChildhoodPaymentController::class, 'index'])->name('childhood-payments.index');
+    Route::patch('/childhood-payments/{payment}/mark-as-paid', [ChildhoodPaymentController::class, 'markAsPaid'])->name('childhood-payments.mark-as-paid');
+    Route::patch('/childhood-payments/{payment}/process-payment', [ChildhoodPaymentController::class, 'processPayment'])->name('childhood-payments.process-payment');
+    Route::patch('/childhood-payments/{payment}/mark-as-cancelled', [ChildhoodPaymentController::class, 'markAsCancelled'])->name('childhood-payments.mark-as-cancelled');
+    Route::patch('/childhood-payments/{payment}/update-amount', [ChildhoodPaymentController::class, 'updateAmount'])->name('childhood-payments.update-amount');
 });
 
 require __DIR__.'/auth.php';

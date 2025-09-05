@@ -17,6 +17,7 @@ class DatabaseSeeder extends Seeder
             SuperAdminSeeder::class,
             CourseSeeder::class,
             TeacherSeeder::class,
+            ChildhoodEducationSeeder::class,
         ]);
     }
 }
