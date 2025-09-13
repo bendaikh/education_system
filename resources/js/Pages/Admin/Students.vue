@@ -160,6 +160,17 @@ const nextPage = () => {
     currentPage.value++;
   }
 };
+
+// Format date function
+const formatDate = (dateString) => {
+  if (!dateString) return 'N/A';
+  const date = new Date(dateString);
+  return date.toLocaleDateString('en-US', {
+    year: 'numeric',
+    month: 'short',
+    day: 'numeric'
+  });
+};
 </script>
 
 <template>
@@ -234,6 +245,7 @@ const nextPage = () => {
             <tr>
               <th class="text-left py-4 px-6 text-xs font-medium text-gray-500 uppercase tracking-wider">{{ language.student_name || 'Student Name' }}</th>
               <th class="text-left py-4 px-6 text-xs font-medium text-gray-500 uppercase tracking-wider">{{ language.student_id || 'Student ID' }}</th>
+              <th class="text-left py-4 px-6 text-xs font-medium text-gray-500 uppercase tracking-wider">{{ language.date_of_birth || 'Date of Birth' }}</th>
               <th class="text-left py-4 px-6 text-xs font-medium text-gray-500 uppercase tracking-wider">{{ language.grade || 'Grade' }}</th>
               <th class="text-left py-4 px-6 text-xs font-medium text-gray-500 uppercase tracking-wider">{{ language.contact_parent || 'Contact Parent' }}</th>
               <th class="text-left py-4 px-6 text-xs font-medium text-gray-500 uppercase tracking-wider">{{ language.actions || 'Actions' }}</th>
@@ -246,6 +258,9 @@ const nextPage = () => {
               </td>
               <td class="py-4 px-6">
                 <div class="text-sm text-gray-600 font-mono">{{ student.student_id }}</div>
+              </td>
+              <td class="py-4 px-6">
+                <div class="text-sm text-gray-600">{{ formatDate(student.date_of_birth) }}</div>
               </td>
               <td class="py-4 px-6">
                 <div class="text-sm text-gray-600">{{ student.grade }}</div>
@@ -314,6 +329,10 @@ const nextPage = () => {
             </div>
           </div>
           <div class="grid grid-cols-1 gap-2 text-sm">
+            <div>
+              <span class="text-gray-500">{{ (language.date_of_birth || 'Date of Birth') + ':' }}</span>
+              <span class="ml-1 text-gray-900">{{ formatDate(student.date_of_birth) }}</span>
+            </div>
             <div>
               <span class="text-gray-500">{{ (language.grade || 'Grade') + ':' }}</span>
               <span class="ml-1 text-gray-900">{{ student.grade }}</span>

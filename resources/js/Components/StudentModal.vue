@@ -192,11 +192,10 @@ watch(() => props.editingStudent, (newStudent) => {
     }
 }, { immediate: true });
 
-// Get today's date for max date of birth (should be in the past)
+// Get today's date for max date of birth (should be today or in the past)
 const today = new Date().toISOString().split('T')[0];
-// Calculate max date (18 years ago for reasonable student age)
+// Set max date to today to allow newly born students
 const maxDate = new Date();
-maxDate.setFullYear(maxDate.getFullYear() - 5); // Minimum 5 years old
 const maxDateString = maxDate.toISOString().split('T')[0];
 
 // Calculate min date (reasonable max age for students)
