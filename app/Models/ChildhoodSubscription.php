@@ -14,13 +14,17 @@ class ChildhoodSubscription extends Model
         'start_date',
         'end_date',
         'status',
-        'notes'
+        'notes',
+        'payment_reference_number',
+        'assurance_price'
     ];
 
     protected $casts = [
         'start_date' => 'date',
         'end_date' => 'date',
-        'status' => 'string'
+        'status' => 'string',
+        'payment_reference_number' => 'string',
+        'assurance_price' => 'decimal:2'
     ];
 
     public function student(): BelongsTo

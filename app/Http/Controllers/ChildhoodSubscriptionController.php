@@ -31,6 +31,8 @@ class ChildhoodSubscriptionController extends Controller
                     'start_date' => optional($s->start_date)->format('Y-m-d'),
                     'end_date' => optional($s->end_date)->format('Y-m-d'),
                     'notes' => $s->notes,
+                    'payment_reference_number' => $s->payment_reference_number,
+                    'assurance_price' => $s->assurance_price,
                 ];
             });
 
@@ -51,7 +53,9 @@ class ChildhoodSubscriptionController extends Controller
             'childhood_subject_id' => 'required|exists:childhood_subjects,id',
             'start_date' => 'required|date',
             'status' => 'required|string|in:Active,Inactive,Cancelled',
-            'notes' => 'nullable|string'
+            'notes' => 'nullable|string',
+            'payment_reference_number' => 'nullable|string|max:255',
+            'assurance_price' => 'nullable|numeric|min:0'
         ]);
 
         // Get the subject to determine duration
@@ -70,7 +74,9 @@ class ChildhoodSubscriptionController extends Controller
             'start_date' => $startDate,
             'end_date' => $endDate,
             'status' => $request->status,
-            'notes' => $request->notes
+            'notes' => $request->notes,
+            'payment_reference_number' => $request->payment_reference_number,
+            'assurance_price' => $request->assurance_price
         ]);
 
         // Create payment record with draft status
@@ -91,7 +97,9 @@ class ChildhoodSubscriptionController extends Controller
             'childhood_subject_id' => 'required|exists:childhood_subjects,id',
             'start_date' => 'required|date',
             'status' => 'required|string|in:Active,Inactive,Cancelled',
-            'notes' => 'nullable|string'
+            'notes' => 'nullable|string',
+            'payment_reference_number' => 'nullable|string|max:255',
+            'assurance_price' => 'nullable|numeric|min:0'
         ]);
 
         // Get the subject to determine duration
@@ -109,7 +117,9 @@ class ChildhoodSubscriptionController extends Controller
             'start_date' => $startDate,
             'end_date' => $endDate,
             'status' => $request->status,
-            'notes' => $request->notes
+            'notes' => $request->notes,
+            'payment_reference_number' => $request->payment_reference_number,
+            'assurance_price' => $request->assurance_price
         ]);
 
         return redirect()->back()->with('success', 'Childhood subscription updated successfully.');

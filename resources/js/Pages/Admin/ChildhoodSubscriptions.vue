@@ -40,6 +40,12 @@
                                     Payment Status
                                 </th>
                                 <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                                    Payment Reference
+                                </th>
+                                <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                                    Assurance Price
+                                </th>
+                                <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                                     Notes
                                 </th>
                                 <th class="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">
@@ -103,6 +109,16 @@
                                     >
                                         {{ subscription.payment_status }}
                                     </span>
+                                </td>
+                                <td class="px-6 py-4 whitespace-nowrap">
+                                    <div class="text-sm text-gray-900">
+                                        {{ subscription.payment_reference_number || 'N/A' }}
+                                    </div>
+                                </td>
+                                <td class="px-6 py-4 whitespace-nowrap">
+                                    <div class="text-sm text-gray-900">
+                                        {{ subscription.assurance_price ? formatPrice(subscription.assurance_price) : 'N/A' }}
+                                    </div>
                                 </td>
                                 <td class="px-6 py-4">
                                     <div class="text-sm text-gray-900 max-w-xs truncate">
@@ -224,6 +240,31 @@
                         </select>
                     </div>
 
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                        <div>
+                            <label for="payment_reference_number" class="block text-sm font-medium text-gray-700">Payment Reference Number</label>
+                            <input
+                                id="payment_reference_number"
+                                v-model="form.payment_reference_number"
+                                type="text"
+                                class="mt-1 block w-full border-gray-300 rounded-md shadow-sm focus:ring-primary-500 focus:border-primary-500 sm:text-sm"
+                                placeholder="Enter payment reference number"
+                            />
+                        </div>
+                        <div>
+                            <label for="assurance_price" class="block text-sm font-medium text-gray-700">Assurance Price</label>
+                            <input
+                                id="assurance_price"
+                                v-model="form.assurance_price"
+                                type="number"
+                                step="0.01"
+                                min="0"
+                                class="mt-1 block w-full border-gray-300 rounded-md shadow-sm focus:ring-primary-500 focus:border-primary-500 sm:text-sm"
+                                placeholder="0.00"
+                            />
+                        </div>
+                    </div>
+
                     <div>
                         <label for="notes" class="block text-sm font-medium text-gray-700">Notes</label>
                         <textarea
@@ -281,7 +322,9 @@ const form = reactive({
     start_date: '',
     end_date: '',
     status: 'Active',
-    notes: ''
+    notes: '',
+    payment_reference_number: '',
+    assurance_price: ''
 });
 
 // Computed properties for automatic date calculation
@@ -318,6 +361,8 @@ const resetForm = () => {
     form.end_date = '';
     form.status = 'Active';
     form.notes = '';
+    form.payment_reference_number = '';
+    form.assurance_price = '';
 };
 
 const createSubscription = () => {
@@ -343,6 +388,8 @@ const editSubscription = (subscription) => {
     form.end_date = subscription.end_date;
     form.status = subscription.status;
     form.notes = subscription.notes || '';
+    form.payment_reference_number = subscription.payment_reference_number || '';
+    form.assurance_price = subscription.assurance_price || '';
     showEditModal.value = true;
 };
 
