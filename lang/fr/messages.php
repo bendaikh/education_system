@@ -5,6 +5,7 @@ return [
     'dashboard' => 'Tableau de bord',
     'students' => 'Étudiants',
     'teachers' => 'Enseignants',
+    'all_teachers' => 'Tous les Enseignants',
     'admins' => 'Administrateurs',
     'payments' => 'Paiements',
     'subscriptions' => 'Abonnements',
@@ -164,4 +165,22 @@ return [
     'update_student' => 'Mettre à jour l\'Étudiant',
     'create_student' => 'Créer l\'Étudiant',
     'creating' => 'Création...',
+    
+    // Teacher Payments
+    'teacher_payments' => 'Paiements des Enseignants',
+    'generate_monthly_invoice' => 'Générer la Facture Mensuelle',
+    'select_month' => 'Sélectionner le Mois',
+    'teacher_invoices' => 'Factures des Enseignants',
+    'school_invoices' => 'Factures de l\'École',
+    'total_teacher_payments' => 'Total des Paiements des Enseignants',
+    'total_school_payments' => 'Total des Paiements de l\'École',
+    'total_revenue' => 'Revenus Totaux',
+    'subject_details' => 'Détails des Matières',
+    'no_teacher_invoices' => 'Aucune facture d\'enseignant pour ce mois.',
+    'no_school_invoices' => 'Aucune facture d\'école pour ce mois.',
+    
+    // Percent Fields
+    'school_percent' => 'Pourcentage de l\'École',
+    'teacher_percent' => 'Pourcentage de l\'Enseignant',
+    'percent_validation' => 'La somme des pourcentages de l\'école et de l\'enseignant doit être égale à 100%.',
 ];

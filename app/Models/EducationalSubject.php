@@ -13,11 +13,15 @@ class EducationalSubject extends Model
         'description',
         'duration',
         'price',
+        'school_percent',
+        'teacher_percent',
         'status'
     ];
 
     protected $casts = [
         'price' => 'decimal:2',
+        'school_percent' => 'decimal:2',
+        'teacher_percent' => 'decimal:2',
         'status' => 'string'
     ];
 

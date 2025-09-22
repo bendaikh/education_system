@@ -22,7 +22,7 @@ class ChildhoodPaymentController extends Controller
     public function markAsPaid(ChildhoodPayment $payment)
     {
         $payment->update([
-            'status' => 'Paid',
+            'status' => 'paid',
             'paid_amount' => $payment->amount,
             'payment_date' => now()
         ]);
@@ -40,7 +40,7 @@ class ChildhoodPaymentController extends Controller
         $payment->update([
             'paid_amount' => $request->paid_amount,
             'payment_date' => $request->payment_date,
-            'status' => $request->paid_amount >= $payment->amount ? 'Paid' : 'Partial'
+            'status' => $request->paid_amount >= $payment->amount ? 'paid' : 'partial'
         ]);
 
         return back()->with('success', 'Payment processed successfully');
@@ -49,7 +49,7 @@ class ChildhoodPaymentController extends Controller
     public function markAsCancelled(ChildhoodPayment $payment)
     {
         $payment->update([
-            'status' => 'Cancelled',
+            'status' => 'cancelled',
             'paid_amount' => 0
         ]);
 
@@ -64,7 +64,7 @@ class ChildhoodPaymentController extends Controller
 
         $payment->update([
             'amount' => $request->amount,
-            'status' => $payment->paid_amount >= $request->amount ? 'Paid' : 'Pending'
+            'status' => $payment->paid_amount >= $request->amount ? 'paid' : 'pending'
         ]);
 
         return back()->with('success', 'Payment amount updated successfully');

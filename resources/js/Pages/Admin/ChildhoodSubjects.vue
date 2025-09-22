@@ -181,6 +181,26 @@
                                                    :placeholder="language.price || 'Price'" />
                                         </div>
 
+                                        <!-- Percentage Fields -->
+                                        <div class="grid grid-cols-2 gap-4">
+                                            <div>
+                                                <label class="block text-sm font-medium text-gray-700 mb-1">
+                                                    {{ language.school_percent || 'School Percentage' }} <span class="text-red-500">*</span>
+                                                </label>
+                                                <input v-model="form.school_percent" type="number" step="0.01" min="0" max="100" required
+                                                       class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                                                       placeholder="50.00" />
+                                            </div>
+                                            <div>
+                                                <label class="block text-sm font-medium text-gray-700 mb-1">
+                                                    {{ language.teacher_percent || 'Teacher Percentage' }} <span class="text-red-500">*</span>
+                                                </label>
+                                                <input v-model="form.teacher_percent" type="number" step="0.01" min="0" max="100" required
+                                                       class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                                                       placeholder="50.00" />
+                                            </div>
+                                        </div>
+
                                         <!-- Teachers (Optional) -->
                                         <div>
                                             <label class="block text-sm font-medium text-gray-700 mb-1">
@@ -299,6 +319,8 @@ const form = reactive({
     description: '',
     duration: '',
     price: '',
+    school_percent: 50,
+    teacher_percent: 50,
     status: 'Active'
 });
 
@@ -353,6 +375,8 @@ const editSubject = (subject) => {
     form.description = subject.description || '';
     form.duration = subject.duration || '';
     form.price = subject.price;
+    form.school_percent = subject.school_percent || 50;
+    form.teacher_percent = subject.teacher_percent || 50;
     form.status = subject.status;
     selectedTeachers.value = subject.teachers || [];
     showEditModal.value = true;
@@ -371,6 +395,8 @@ const resetForm = () => {
     form.description = '';
     form.duration = '';
     form.price = '';
+    form.school_percent = 50;
+    form.teacher_percent = 50;
     form.status = 'Active';
     selectedTeachers.value = [];
     teacherSearchQuery.value = '';

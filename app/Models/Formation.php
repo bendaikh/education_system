@@ -17,12 +17,16 @@ class Formation extends Model
         'duration',
         'level',
         'price',
+        'school_percent',
+        'teacher_percent',
         'status',
         'enrolled_students'
     ];
 
     protected $casts = [
         'teachers' => 'array', // Automatically cast JSON to array
+        'school_percent' => 'decimal:2',
+        'teacher_percent' => 'decimal:2',
         'enrolled_students' => 'integer'
     ];
 

@@ -16,6 +16,8 @@ use App\Http\Controllers\EducationalSupportPaymentController;
 use App\Http\Controllers\ChildhoodSubjectController;
 use App\Http\Controllers\ChildhoodSubscriptionController;
 use App\Http\Controllers\ChildhoodPaymentController;
+use App\Http\Controllers\TeachersController;
+use App\Http\Controllers\TeacherPaymentsController;
 use App\Http\Controllers\LanguageController;
 use App\Http\Controllers\SettingsController;
 use Illuminate\Foundation\Application;
@@ -53,8 +55,20 @@ Route::middleware(['auth', 'verified'])->prefix('admin')->name('admin.')->group(
     Route::delete('/students/{student}', [StudentController::class, 'destroy'])->name('students.destroy');
     Route::post('/students/import', [StudentController::class, 'import'])->name('students.import');
     Route::get('/students/template', [StudentController::class, 'downloadTemplate'])->name('students.template');
-    Route::get('/teachers', [TeacherController::class, 'index'])->name('teachers.index');
-    Route::post('/teachers', [TeacherController::class, 'store'])->name('teachers.store');
+    // Teachers Routes
+    Route::get('/teachers', [TeachersController::class, 'index'])->name('teachers.index');
+    Route::get('/teachers/create', [TeachersController::class, 'create'])->name('teachers.create');
+    Route::post('/teachers', [TeachersController::class, 'store'])->name('teachers.store');
+    Route::get('/teachers/{teacher}', [TeachersController::class, 'show'])->name('teachers.show');
+    Route::get('/teachers/{teacher}/edit', [TeachersController::class, 'edit'])->name('teachers.edit');
+    Route::put('/teachers/{teacher}', [TeachersController::class, 'update'])->name('teachers.update');
+    Route::delete('/teachers/{teacher}', [TeachersController::class, 'destroy'])->name('teachers.destroy');
+    
+    // Teacher Payments Routes
+    Route::get('/teacher-payments', [TeacherPaymentsController::class, 'index'])->name('teacher-payments.index');
+    Route::post('/teacher-payments/generate-monthly-invoices', [TeacherPaymentsController::class, 'generateMonthlyInvoices'])->name('teacher-payments.generate-monthly-invoices');
+    Route::get('/teacher-payments/download-teacher-invoice', [TeacherPaymentsController::class, 'downloadTeacherInvoice'])->name('teacher-payments.download-teacher-invoice');
+    Route::get('/teacher-payments/download-school-invoice', [TeacherPaymentsController::class, 'downloadSchoolInvoice'])->name('teacher-payments.download-school-invoice');
        Route::get('/payments', [PaymentController::class, 'index'])->name('payments.index');
    Route::post('/payments', [PaymentController::class, 'store'])->name('payments.store');
    Route::get('/subscriptions', [SubscriptionController::class, 'index'])->name('subscriptions.index');

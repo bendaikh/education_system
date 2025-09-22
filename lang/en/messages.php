@@ -5,6 +5,7 @@ return [
     'dashboard' => 'Dashboard',
     'students' => 'Students',
     'teachers' => 'Teachers',
+    'all_teachers' => 'All Teachers',
     'admins' => 'Admins',
     'payments' => 'Payments',
     'subscriptions' => 'Subscriptions',
@@ -162,4 +163,22 @@ return [
     'update_student' => 'Update Student',
     'create_student' => 'Create Student',
     'creating' => 'Creating...',
+    
+    // Teacher Payments
+    'teacher_payments' => 'Teacher Payments',
+    'generate_monthly_invoice' => 'Generate Monthly Invoice',
+    'select_month' => 'Select Month',
+    'teacher_invoices' => 'Teacher Invoices',
+    'school_invoices' => 'School Invoices',
+    'total_teacher_payments' => 'Total Teacher Payments',
+    'total_school_payments' => 'Total School Payments',
+    'total_revenue' => 'Total Revenue',
+    'subject_details' => 'Subject Details',
+    'no_teacher_invoices' => 'No teacher invoices for this month.',
+    'no_school_invoices' => 'No school invoices for this month.',
+    
+    // Percent Fields
+    'school_percent' => 'School Percentage',
+    'teacher_percent' => 'Teacher Percentage',
+    'percent_validation' => 'The sum of school and teacher percentages must equal 100%.',
 ];

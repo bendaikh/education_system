@@ -23,4 +23,9 @@ class Teacher extends Model
     {
         return $this->belongsToMany(EducationalSubject::class, 'educational_subject_teacher');
     }
+
+    public function childhoodSubjects(): BelongsToMany
+    {
+        return $this->belongsToMany(ChildhoodSubject::class, 'childhood_subject_teacher');
+    }
 }
