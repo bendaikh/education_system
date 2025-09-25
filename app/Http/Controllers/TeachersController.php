@@ -17,18 +17,11 @@ class TeachersController extends Controller
             ->orderBy('name')
             ->get();
 
-        return Inertia::render('Admin/Teachers/Index', [
+        return Inertia::render('Admin/Teachers', [
             'teachers' => $teachers,
         ]);
     }
 
-    /**
-     * Show the form for creating a new teacher.
-     */
-    public function create()
-    {
-        return Inertia::render('Admin/Teachers/Create');
-    }
 
     /**
      * Store a newly created teacher.
@@ -50,27 +43,7 @@ class TeachersController extends Controller
             ->with('success', 'Teacher created successfully!');
     }
 
-    /**
-     * Display the specified teacher.
-     */
-    public function show(Teacher $teacher)
-    {
-        $teacher->load(['educationalSubjects', 'childhoodSubjects']);
 
-        return Inertia::render('Admin/Teachers/Show', [
-            'teacher' => $teacher,
-        ]);
-    }
-
-    /**
-     * Show the form for editing the specified teacher.
-     */
-    public function edit(Teacher $teacher)
-    {
-        return Inertia::render('Admin/Teachers/Edit', [
-            'teacher' => $teacher,
-        ]);
-    }
 
     /**
      * Update the specified teacher.

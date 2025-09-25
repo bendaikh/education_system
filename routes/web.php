@@ -57,10 +57,7 @@ Route::middleware(['auth', 'verified'])->prefix('admin')->name('admin.')->group(
     Route::get('/students/template', [StudentController::class, 'downloadTemplate'])->name('students.template');
     // Teachers Routes
     Route::get('/teachers', [TeachersController::class, 'index'])->name('teachers.index');
-    Route::get('/teachers/create', [TeachersController::class, 'create'])->name('teachers.create');
     Route::post('/teachers', [TeachersController::class, 'store'])->name('teachers.store');
-    Route::get('/teachers/{teacher}', [TeachersController::class, 'show'])->name('teachers.show');
-    Route::get('/teachers/{teacher}/edit', [TeachersController::class, 'edit'])->name('teachers.edit');
     Route::put('/teachers/{teacher}', [TeachersController::class, 'update'])->name('teachers.update');
     Route::delete('/teachers/{teacher}', [TeachersController::class, 'destroy'])->name('teachers.destroy');
     

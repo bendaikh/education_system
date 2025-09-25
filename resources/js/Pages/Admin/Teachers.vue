@@ -37,9 +37,21 @@ const toastMessage = ref('');
 
 // Modal state
 const showCreateModal = ref(false);
+const showEditModal = ref(false);
+const showViewModal = ref(false);
+const selectedTeacher = ref(null);
 
 // Form for creating new teacher
 const form = useForm({
+  name: '',
+  department: '',
+  contact_phone: '',
+  contact_email: '',
+  role: ''
+});
+
+// Form for editing teacher
+const editForm = useForm({
   name: '',
   department: '',
   contact_phone: '',
@@ -58,10 +70,51 @@ const closeCreateModal = () => {
   form.reset();
 };
 
+const openEditModal = (teacher) => {
+  selectedTeacher.value = teacher;
+  editForm.name = teacher.name;
+  editForm.department = teacher.department;
+  editForm.contact_phone = teacher.contact_phone;
+  editForm.contact_email = teacher.contact_email;
+  editForm.role = teacher.role;
+  showEditModal.value = true;
+};
+
+const closeEditModal = () => {
+  showEditModal.value = false;
+  selectedTeacher.value = null;
+  editForm.reset();
+};
+
+const openViewModal = (teacher) => {
+  selectedTeacher.value = teacher;
+  showViewModal.value = true;
+};
+
+const closeViewModal = () => {
+  showViewModal.value = false;
+  selectedTeacher.value = null;
+};
+
 const submitForm = () => {
   form.post(route('admin.teachers.store'), {
     onSuccess: () => {
       closeCreateModal();
+      showSuccessToast('Teacher created successfully!');
+      // Force a page refresh to get updated data
+      router.visit(route('admin.teachers.index'), {
+        preserveState: false,
+        preserveScroll: true
+      });
+    }
+  });
+};
+
+const submitEditForm = () => {
+  editForm.put(route('admin.teachers.update', selectedTeacher.value.id), {
+    onSuccess: () => {
+      closeEditModal();
+      showSuccessToast('Teacher updated successfully!');
       // Force a page refresh to get updated data
       router.visit(route('admin.teachers.index'), {
         preserveState: false,
@@ -172,6 +225,45 @@ const showSuccessToast = (message) => {
 if (page.props.flash?.success) {
   showSuccessToast(page.props.flash.success);
 }
+
+// Utility function to format dates
+const formatDate = (dateString) => {
+  if (!dateString) return 'Not available';
+  return new Date(dateString).toLocaleDateString('en-US', {
+    year: 'numeric',
+    month: 'long',
+    day: 'numeric',
+    hour: '2-digit',
+    minute: '2-digit'
+  });
+};
+
+// Action functions
+const viewTeacher = (teacher) => {
+  openViewModal(teacher);
+};
+
+const editTeacher = (teacher) => {
+  openEditModal(teacher);
+};
+
+const deleteTeacher = (teacherId) => {
+  if (confirm('Are you sure you want to delete this teacher? This action cannot be undone.')) {
+    router.delete(route('admin.teachers.destroy', teacherId), {
+      onSuccess: () => {
+        showSuccessToast('Teacher deleted successfully!');
+        // Force a page refresh to get updated data
+        router.visit(route('admin.teachers.index'), {
+          preserveState: false,
+          preserveScroll: true
+        });
+      },
+      onError: () => {
+        showSuccessToast('Error deleting teacher. Please try again.');
+      }
+    });
+  }
+};
 </script>
 
 <template>
@@ -261,20 +353,20 @@ if (page.props.flash?.success) {
               <td class="py-4 px-6">
                 <div class="flex items-center gap-3">
                   <!-- View Button -->
-                  <button class="text-green-600 hover:text-green-800 transition-colors duration-200" title="View Teacher">
+                  <button @click="viewTeacher(teacher)" class="text-green-600 hover:text-green-800 transition-colors duration-200" title="View Teacher">
                     <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                       <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"></path>
                       <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"></path>
                     </svg>
                   </button>
                   <!-- Edit Button -->
-                  <button class="text-blue-600 hover:text-blue-800 transition-colors duration-200" title="Edit Teacher">
+                  <button @click="editTeacher(teacher)" class="text-blue-600 hover:text-blue-800 transition-colors duration-200" title="Edit Teacher">
                     <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                       <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"></path>
                     </svg>
                   </button>
                   <!-- Delete Button -->
-                  <button class="text-red-600 hover:text-red-800 transition-colors duration-200" title="Delete Teacher">
+                  <button @click="deleteTeacher(teacher.id)" class="text-red-600 hover:text-red-800 transition-colors duration-200" title="Delete Teacher">
                     <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                       <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"></path>
                     </svg>
@@ -310,20 +402,20 @@ if (page.props.flash?.success) {
           </div>
           <div class="flex items-center gap-2">
             <!-- View Button -->
-            <button class="p-2 text-green-600 hover:bg-green-50 rounded-lg transition-colors duration-200 min-h-[44px] min-w-[44px] flex items-center justify-center">
+            <button @click="viewTeacher(teacher)" class="p-2 text-green-600 hover:bg-green-50 rounded-lg transition-colors duration-200 min-h-[44px] min-w-[44px] flex items-center justify-center">
               <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"></path>
                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"></path>
               </svg>
             </button>
             <!-- Edit Button -->
-            <button class="p-2 text-blue-600 hover:bg-blue-50 rounded-lg transition-colors duration-200 min-h-[44px] min-w-[44px] flex items-center justify-center">
+            <button @click="editTeacher(teacher)" class="p-2 text-blue-600 hover:bg-blue-50 rounded-lg transition-colors duration-200 min-h-[44px] min-w-[44px] flex items-center justify-center">
               <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"></path>
               </svg>
             </button>
             <!-- Delete Button -->
-            <button class="p-2 text-red-600 hover:bg-red-50 rounded-lg transition-colors duration-200 min-h-[44px] min-w-[44px] flex items-center justify-center">
+            <button @click="deleteTeacher(teacher.id)" class="p-2 text-red-600 hover:bg-red-50 rounded-lg transition-colors duration-200 min-h-[44px] min-w-[44px] flex items-center justify-center">
               <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"></path>
               </svg>
@@ -495,6 +587,200 @@ if (page.props.flash?.success) {
             </PrimaryButton>
           </div>
         </form>
+      </div>
+    </Modal>
+
+    <!-- Edit Teacher Modal -->
+    <Modal :show="showEditModal" @close="closeEditModal" max-width="2xl">
+      <div class="p-6">
+        <div class="flex justify-between items-center mb-6">
+          <h2 class="text-2xl font-bold text-gray-900">Edit Teacher</h2>
+          <button @click="closeEditModal" class="text-gray-400 hover:text-gray-600">
+            <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
+            </svg>
+          </button>
+        </div>
+
+        <form @submit.prevent="submitEditForm" class="space-y-6">
+          <!-- Teacher Information -->
+          <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <!-- Teacher Name -->
+            <div>
+              <InputLabel for="edit_name" value="Teacher Name *" />
+              <TextInput
+                id="edit_name"
+                v-model="editForm.name"
+                type="text"
+                class="mt-1 block w-full"
+                placeholder="e.g., Dr. John Smith"
+                required
+              />
+              <InputError class="mt-2" :message="editForm.errors.name" />
+            </div>
+
+            <!-- Department -->
+            <div>
+              <InputLabel for="edit_department" value="Department *" />
+              <TextInput
+                id="edit_department"
+                v-model="editForm.department"
+                type="text"
+                class="mt-1 block w-full"
+                placeholder="e.g., Mathematics, Science"
+                required
+              />
+              <InputError class="mt-2" :message="editForm.errors.department" />
+            </div>
+
+            <!-- Contact Phone -->
+            <div>
+              <InputLabel for="edit_contact_phone" value="Contact Phone *" />
+              <TextInput
+                id="edit_contact_phone"
+                v-model="editForm.contact_phone"
+                type="tel"
+                class="mt-1 block w-full"
+                placeholder="e.g., +1 (555) 123-4567"
+                required
+              />
+              <InputError class="mt-2" :message="editForm.errors.contact_phone" />
+            </div>
+
+            <!-- Contact Email -->
+            <div>
+              <InputLabel for="edit_contact_email" value="Contact Email *" />
+              <TextInput
+                id="edit_contact_email"
+                v-model="editForm.contact_email"
+                type="email"
+                class="mt-1 block w-full"
+                placeholder="e.g., john.smith@school.com"
+                required
+              />
+              <InputError class="mt-2" :message="editForm.errors.contact_email" />
+            </div>
+
+            <!-- Role (Optional) -->
+            <div class="md:col-span-2">
+              <InputLabel for="edit_role" value="Role (Optional)" />
+              <TextInput
+                id="edit_role"
+                v-model="editForm.role"
+                type="text"
+                class="mt-1 block w-full"
+                placeholder="e.g., Head of Department, Senior Teacher"
+              />
+              <InputError class="mt-2" :message="editForm.errors.role" />
+            </div>
+          </div>
+
+          <!-- Form Actions -->
+          <div class="flex items-center justify-end gap-4 pt-4 border-t border-gray-200">
+            <SecondaryButton type="button" @click="closeEditModal">
+              Cancel
+            </SecondaryButton>
+            <PrimaryButton :class="{ 'opacity-25': editForm.processing }" :disabled="editForm.processing">
+              Update Teacher
+            </PrimaryButton>
+          </div>
+        </form>
+      </div>
+    </Modal>
+
+    <!-- View Teacher Modal -->
+    <Modal :show="showViewModal" @close="closeViewModal" max-width="4xl">
+      <div class="p-6">
+        <div class="flex justify-between items-center mb-6">
+          <h2 class="text-2xl font-bold text-gray-900">Teacher Details</h2>
+          <button @click="closeViewModal" class="text-gray-400 hover:text-gray-600">
+            <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
+            </svg>
+          </button>
+        </div>
+
+        <div v-if="selectedTeacher" class="space-y-6">
+          <!-- Teacher Header -->
+          <div class="bg-gradient-to-r from-blue-500 to-purple-600 rounded-xl p-6 text-white">
+            <div class="flex items-center space-x-4">
+              <div class="w-16 h-16 bg-white bg-opacity-20 rounded-full flex items-center justify-center">
+                <svg class="w-8 h-8 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"></path>
+                </svg>
+              </div>
+              <div>
+                <h3 class="text-2xl font-bold">{{ selectedTeacher.name }}</h3>
+                <p class="text-blue-100">{{ selectedTeacher.role || 'Teacher' }}</p>
+                <p class="text-blue-200 text-sm">{{ selectedTeacher.department || 'No Department' }}</p>
+              </div>
+            </div>
+          </div>
+
+          <!-- Contact Information -->
+          <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+            <div class="bg-white rounded-lg border border-gray-200 p-6">
+              <h4 class="text-lg font-semibold text-gray-900 mb-4">Contact Information</h4>
+              <div class="space-y-4">
+                <div class="flex items-center space-x-3">
+                  <div class="w-10 h-10 bg-blue-100 rounded-lg flex items-center justify-center">
+                    <svg class="w-5 h-5 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 8l7.89 4.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z"></path>
+                    </svg>
+                  </div>
+                  <div>
+                    <p class="text-sm text-gray-500">Email</p>
+                    <p class="font-medium text-gray-900">{{ selectedTeacher.contact_email || 'Not provided' }}</p>
+                  </div>
+                </div>
+
+                <div class="flex items-center space-x-3">
+                  <div class="w-10 h-10 bg-green-100 rounded-lg flex items-center justify-center">
+                    <svg class="w-5 h-5 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 5a2 2 0 012-2h3.28a1 1 0 01.948.684l1.498 4.493a1 1 0 01-.502 1.21l-2.257 1.13a11.042 11.042 0 005.516 5.516l1.13-2.257a1 1 0 011.21-.502l4.493 1.498a1 1 0 01.684.949V19a2 2 0 01-2 2h-1C9.716 21 3 14.284 3 6V5z"></path>
+                    </svg>
+                  </div>
+                  <div>
+                    <p class="text-sm text-gray-500">Phone</p>
+                    <p class="font-medium text-gray-900">{{ selectedTeacher.contact_phone || 'Not provided' }}</p>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <div class="bg-white rounded-lg border border-gray-200 p-6">
+              <h4 class="text-lg font-semibold text-gray-900 mb-4">Additional Information</h4>
+              <div class="space-y-4">
+                <div>
+                  <p class="text-sm text-gray-500">Role</p>
+                  <p class="font-medium text-gray-900">{{ selectedTeacher.role || 'Teacher' }}</p>
+                </div>
+                <div>
+                  <p class="text-sm text-gray-500">Department</p>
+                  <p class="font-medium text-gray-900">{{ selectedTeacher.department || 'No Department' }}</p>
+                </div>
+                <div>
+                  <p class="text-sm text-gray-500">Created</p>
+                  <p class="font-medium text-gray-900">{{ formatDate(selectedTeacher.created_at) }}</p>
+                </div>
+                <div>
+                  <p class="text-sm text-gray-500">Last Updated</p>
+                  <p class="font-medium text-gray-900">{{ formatDate(selectedTeacher.updated_at) }}</p>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Action Buttons -->
+          <div class="flex items-center justify-end gap-4 pt-4 border-t border-gray-200">
+            <SecondaryButton @click="closeViewModal">
+              Close
+            </SecondaryButton>
+            <PrimaryButton @click="editTeacher(selectedTeacher)">
+              Edit Teacher
+            </PrimaryButton>
+          </div>
+        </div>
       </div>
     </Modal>
 
