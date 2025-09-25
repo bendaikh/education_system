@@ -6,6 +6,7 @@ use Illuminate\Http\Request;
 use Inertia\Inertia;
 use Inertia\Response;
 use App\Models\Setting;
+use Illuminate\Support\Facades\Storage;
 
 class SettingsController extends Controller
 {
@@ -22,6 +23,7 @@ class SettingsController extends Controller
             'email_notifications' => Setting::get('email_notifications', 'true') === 'true',
             'push_notifications' => Setting::get('push_notifications', 'false') === 'true',
             'monthly_reports' => Setting::get('monthly_reports', 'true') === 'true',
+            'logo' => Setting::get('logo') ? Storage::url(Setting::get('logo')) : null,
         ];
 
         return Inertia::render('Admin/Settings', [

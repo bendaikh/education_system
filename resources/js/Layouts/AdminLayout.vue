@@ -83,7 +83,15 @@ const navItems = computed(() => {
     return [
         { label: language.dashboard || 'Dashboard', href: '/admin/dashboard' },
         { label: language.students || 'Students', href: '/admin/students' },
-        { label: language.teachers || 'Teachers', href: '/admin/teachers' },
+        { 
+            label: language.teachers || 'Teachers', 
+            key: 'teachers',
+            hasSubmenu: true,
+            subitems: [
+                { label: language.all_teachers || 'All Teachers', href: '/admin/teachers' },
+                { label: language.payments || 'Payments', href: '/admin/teacher-payments' },
+            ]
+        },
         { 
             label: language.educational_support || 'Educational Support', 
             key: 'educational_support',
@@ -288,6 +296,10 @@ const navItems = computed(() => {
                                         <div class="w-5 h-5 flex-shrink-0">
                                             <svg v-if="item.key === 'subscriptions'" class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v10a2 2 0 002 2h8a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-3 7h3m-3 4h3m-6-4h.01M9 16h.01"></path>
+                                            </svg>
+                                            <!-- Teachers Icon -->
+                                            <svg v-else-if="item.key === 'teachers'" class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"></path>
                                             </svg>
                                             <!-- Educational Support Icon -->
                                             <svg v-else-if="item.key === 'educational_support'" class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">

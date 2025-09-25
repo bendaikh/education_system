@@ -47,6 +47,8 @@ const formData = ref({
   duration: '',
   level: '',
   price: '',
+  school_percent: 50,
+  teacher_percent: 50,
   status: 'Active'
 });
 
@@ -110,6 +112,8 @@ const openEditModal = (formation) => {
     duration: formation.duration || '',
     level: formation.level || '',
     price: formation.price || '',
+    school_percent: formation.school_percent || 50,
+    teacher_percent: formation.teacher_percent || 50,
     status: formation.status || 'Active',
   };
 };
@@ -132,6 +136,8 @@ const resetForm = () => {
     duration: '',
     level: '',
     price: '',
+    school_percent: 50,
+    teacher_percent: 50,
     status: 'Active'
   };
   isTeacherDropdownOpen.value = false;
@@ -636,6 +642,26 @@ const getLevelClass = (level) => {
                     <input v-model="formData.price" type="text" required 
                            class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
                            :placeholder="formatPrice(299)" />
+                  </div>
+
+                  <!-- Percentage Fields -->
+                  <div class="grid grid-cols-2 gap-4">
+                    <div>
+                      <label class="block text-sm font-medium text-gray-700 mb-1">
+                        {{ language.school_percent || 'School Percentage' }} <span class="text-red-500">*</span>
+                      </label>
+                      <input v-model="formData.school_percent" type="number" min="0" max="100" step="0.01" required 
+                             class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                             placeholder="50.00" />
+                    </div>
+                    <div>
+                      <label class="block text-sm font-medium text-gray-700 mb-1">
+                        {{ language.teacher_percent || 'Teacher Percentage' }} <span class="text-red-500">*</span>
+                      </label>
+                      <input v-model="formData.teacher_percent" type="number" min="0" max="100" step="0.01" required 
+                             class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                             placeholder="50.00" />
+                    </div>
                   </div>
 
                   <!-- Duration (Optional) -->
