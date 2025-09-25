@@ -253,8 +253,11 @@ const generateInvoices = async () => {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
+        'Accept': 'application/json',
+        'X-Requested-With': 'XMLHttpRequest',
         'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').getAttribute('content'),
       },
+      credentials: 'same-origin',
       body: JSON.stringify({
         month: selectedMonth.value,
       }),
