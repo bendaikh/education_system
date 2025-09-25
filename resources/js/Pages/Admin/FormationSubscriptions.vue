@@ -15,7 +15,7 @@ const isEditing = ref(false);
 const currentId = ref(null);
 const showDelete = ref(false);
 const deleteId = ref(null);
-const form = ref({ student_id: '', formation_id: '', start_date: '', status: 'active', notes: '' });
+const form = ref({ student_id: '', formation_id: '', start_date: '', status: 'active', notes: '', payment_reference_number: '' });
 
 // Toast
 const showToast = ref(false);
@@ -36,11 +36,12 @@ const openEdit = (row) => {
     formation_id: row.formation_id || '',
     start_date: row.start_date || '',
     status: (row.status || 'active').toLowerCase(),
-    notes: row.notes || ''
+    notes: row.notes || '',
+    payment_reference_number: row.payment_reference_number || ''
   };
   showModal.value = true;
 };
-const closeModal = () => { showModal.value = false; form.value = { student_id: '', formation_id: '', status: 'active', notes: '' }; };
+const closeModal = () => { showModal.value = false; form.value = { student_id: '', formation_id: '', status: 'active', notes: '', payment_reference_number: '' }; };
 const submit = () => {
   if (isEditing.value && currentId.value) {
     router.put(`/admin/formation-subscriptions/${currentId.value}`, form.value, {
@@ -78,6 +79,7 @@ const confirmDelete = () => { if (!deleteId.value) return; router.delete(`/admin
               <th class="text-left py-4 px-6 text-xs font-medium text-gray-500 uppercase tracking-wider">Price</th>
               <th class="text-left py-4 px-6 text-xs font-medium text-gray-500 uppercase tracking-wider">Status</th>
               <th class="text-left py-4 px-6 text-xs font-medium text-gray-500 uppercase tracking-wider">Payment</th>
+              <th class="text-left py-4 px-6 text-xs font-medium text-gray-500 uppercase tracking-wider">Payment Reference</th>
               <th class="text-left py-4 px-6 text-xs font-medium text-gray-500 uppercase tracking-wider">Start Date</th>
               <th class="text-left py-4 px-6 text-xs font-medium text-gray-500 uppercase tracking-wider">End Date</th>
               <th class="text-left py-4 px-6 text-xs font-medium text-gray-500 uppercase tracking-wider">Actions</th>
@@ -102,6 +104,7 @@ const confirmDelete = () => { if (!deleteId.value) return; router.delete(`/admin
                   'bg-red-100 text-red-800': s.payment_status === 'Cancelled',
                 }" class="px-2 py-1 text-xs font-medium rounded-full">{{ s.payment_status }}</span>
               </td>
+              <td class="py-4 px-6"><div class="text-sm text-gray-700">{{ s.payment_reference_number || 'N/A' }}</div></td>
               <td class="py-4 px-6"><div class="text-sm text-gray-700">{{ s.start_date }}</div></td>
               <td class="py-4 px-6"><div class="text-sm text-gray-700">{{ s.end_date }}</div></td>
               <td class="py-4 px-6">
@@ -150,6 +153,15 @@ const confirmDelete = () => { if (!deleteId.value) return; router.delete(`/admin
           <div>
             <label class="block text-sm font-medium mb-1">Start Date</label>
             <input v-model="form.start_date" type="date" class="w-full border rounded-lg px-3 py-2" />
+          </div>
+          <div>
+            <label class="block text-sm font-medium mb-1">Payment Reference Number</label>
+            <input
+              v-model="form.payment_reference_number"
+              type="text"
+              class="w-full border rounded-lg px-3 py-2"
+              placeholder="Enter payment reference number"
+            />
           </div>
           <div>
             <label class="block text-sm font-medium mb-1">Notes</label>

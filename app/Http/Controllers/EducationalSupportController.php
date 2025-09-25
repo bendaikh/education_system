@@ -36,7 +36,8 @@ class EducationalSupportController extends Controller
             'educational_subject_id' => 'required|exists:educational_subjects,id',
             'start_date' => 'required|date',
             'status' => 'required|in:active,completed,cancelled',
-            'notes' => 'nullable|string'
+            'notes' => 'nullable|string',
+            'payment_reference_number' => 'nullable|string'
         ]);
 
         // Get the subject to determine duration
@@ -55,7 +56,8 @@ class EducationalSupportController extends Controller
             'start_date' => $startDate,
             'end_date' => $endDate,
             'status' => $request->status,
-            'notes' => $request->notes
+            'notes' => $request->notes,
+            'payment_reference_number' => $request->payment_reference_number
         ]);
 
         // Create payment record with draft status
@@ -76,7 +78,8 @@ class EducationalSupportController extends Controller
             'educational_subject_id' => 'required|exists:educational_subjects,id',
             'start_date' => 'required|date',
             'status' => 'required|in:active,completed,cancelled',
-            'notes' => 'nullable|string'
+            'notes' => 'nullable|string',
+            'payment_reference_number' => 'nullable|string'
         ]);
 
         // Get the subject to determine duration
@@ -95,7 +98,8 @@ class EducationalSupportController extends Controller
             'start_date' => $startDate,
             'end_date' => $endDate,
             'status' => $request->status,
-            'notes' => $request->notes
+            'notes' => $request->notes,
+            'payment_reference_number' => $request->payment_reference_number
         ]);
 
         return redirect()->back()->with('success', 'Educational support subscription updated successfully.');

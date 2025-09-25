@@ -14,13 +14,15 @@ class FormationSubscription extends Model
         'start_date',
         'end_date',
         'status',
-        'notes'
+        'notes',
+        'payment_reference_number'
     ];
 
     protected $casts = [
         'start_date' => 'date',
         'end_date' => 'date',
-        'status' => 'string'
+        'status' => 'string',
+        'payment_reference_number' => 'string'
     ];
 
     public function student(): BelongsTo

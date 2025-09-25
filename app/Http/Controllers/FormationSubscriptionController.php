@@ -31,6 +31,7 @@ class FormationSubscriptionController extends Controller
                     'end_date' => optional($s->end_date)->format('Y-m-d'),
                     'price' => (float) ($s->formation->price ?? 0),
                     'notes' => $s->notes,
+                    'payment_reference_number' => $s->payment_reference_number,
                 ];
             });
 
@@ -51,7 +52,8 @@ class FormationSubscriptionController extends Controller
             'formation_id' => 'required|exists:formations,id',
             'start_date' => 'required|date',
             'status' => 'required|in:active,completed,cancelled',
-            'notes' => 'nullable|string'
+            'notes' => 'nullable|string',
+            'payment_reference_number' => 'nullable|string'
         ]);
 
         $startDate = Carbon::parse($validated['start_date'])->startOfDay();
@@ -64,6 +66,7 @@ class FormationSubscriptionController extends Controller
             'end_date' => $endDate,
             'status' => $validated['status'],
             'notes' => $validated['notes'] ?? null,
+            'payment_reference_number' => $validated['payment_reference_number'] ?? null,
         ]);
 
         $formation = Formation::find($validated['formation_id']);
@@ -84,7 +87,8 @@ class FormationSubscriptionController extends Controller
             'formation_id' => 'required|exists:formations,id',
             'start_date' => 'required|date',
             'status' => 'required|in:active,completed,cancelled',
-            'notes' => 'nullable|string'
+            'notes' => 'nullable|string',
+            'payment_reference_number' => 'nullable|string'
         ]);
 
         $startDate = Carbon::parse($validated['start_date'])->startOfDay();
@@ -97,6 +101,7 @@ class FormationSubscriptionController extends Controller
             'end_date' => $endDate,
             'status' => $validated['status'],
             'notes' => $validated['notes'] ?? null,
+            'payment_reference_number' => $validated['payment_reference_number'] ?? null,
         ]);
 
         return redirect()->back()->with('success', 'Formation subscription updated successfully.');

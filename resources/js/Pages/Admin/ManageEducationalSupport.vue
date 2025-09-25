@@ -43,6 +43,9 @@
                                     {{ language.payment_status }}
                                 </th>
                                 <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                                    {{ language.payment_reference_number || 'Payment Reference' }}
+                                </th>
+                                <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                                     {{ language.actions }}
                                 </th>
                             </tr>
@@ -86,6 +89,9 @@
                                         {{ getPaymentStatusText(subscription.payment?.status) }}
                                     </span>
                                 </td>
+                                <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
+                                    {{ subscription.payment_reference_number || 'N/A' }}
+                                </td>
                                 <td class="px-6 py-4 whitespace-nowrap text-sm font-medium">
                                     <div class="flex items-center gap-2">
                                         <button
@@ -108,7 +114,7 @@
                                 </td>
                             </tr>
                             <tr v-if="subscriptions.length === 0">
-                                <td colspan="8" class="px-6 py-4 text-center text-sm text-gray-500">
+                                <td colspan="9" class="px-6 py-4 text-center text-sm text-gray-500">
                                     No educational support subscriptions found.
                                 </td>
                             </tr>
@@ -212,6 +218,19 @@
                                         </select>
                                     </div>
 
+                                    <!-- Payment Reference Number (Optional) -->
+                                    <div>
+                                        <label class="block text-sm font-medium text-gray-700 mb-1">
+                                            {{ language.payment_reference_number || 'Payment Reference Number' }} <span class="text-gray-400 text-xs">({{ language.optional || 'Optional' }})</span>
+                                        </label>
+                                        <input
+                                            v-model="form.payment_reference_number"
+                                            type="text"
+                                            class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                                            :placeholder="language.payment_reference_number || 'Enter payment reference number'"
+                                        />
+                                    </div>
+
                                     <!-- Notes (Optional) -->
                                     <div>
                                         <label class="block text-sm font-medium text-gray-700 mb-1">
@@ -267,7 +286,8 @@ const form = reactive({
     educational_subject_id: '',
     start_date: '',
     status: 'active',
-    notes: ''
+    notes: '',
+    payment_reference_number: ''
 });
 
 // Computed properties for date calculation
@@ -300,6 +320,7 @@ const editSubscription = (subscription) => {
     form.start_date = subscription.start_date; // Include start_date in edit form
     form.status = subscription.status;
     form.notes = subscription.notes || '';
+    form.payment_reference_number = subscription.payment_reference_number || '';
     showEditModal.value = true;
 };
 
@@ -338,6 +359,7 @@ const resetForm = () => {
     form.start_date = '';
     form.status = 'active';
     form.notes = '';
+    form.payment_reference_number = '';
 };
 
 const formatDate = (date) => {
