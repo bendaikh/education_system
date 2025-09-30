@@ -69,4 +69,17 @@ class ChildhoodPaymentController extends Controller
 
         return back()->with('success', 'Payment amount updated successfully');
     }
+
+    public function updatePaymentDate(Request $request, ChildhoodPayment $payment)
+    {
+        $request->validate([
+            'payment_date' => 'required|date'
+        ]);
+
+        $payment->update([
+            'payment_date' => $request->payment_date
+        ]);
+
+        return back()->with('success', 'Payment date updated successfully');
+    }
 }

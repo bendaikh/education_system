@@ -88,6 +88,7 @@ Route::middleware(['auth', 'verified'])->prefix('admin')->name('admin.')->group(
    Route::patch('/formation-payments/{payment}/process-payment', [FormationPaymentController::class, 'processPayment'])->name('formation-payments.process-payment');
    Route::patch('/formation-payments/{payment}/mark-as-cancelled', [FormationPaymentController::class, 'markAsCancelled'])->name('formation-payments.mark-as-cancelled');
    Route::patch('/formation-payments/{payment}/update-amount', [FormationPaymentController::class, 'updateAmount'])->name('formation-payments.update-amount');
+   Route::patch('/formation-payments/{payment}/update-payment-date', [FormationPaymentController::class, 'updatePaymentDate'])->name('formation-payments.update-payment-date');
    Route::get('/educational-subjects', [EducationalSubjectController::class, 'index'])->name('educational-subjects.index');
    Route::post('/educational-subjects', [EducationalSubjectController::class, 'store'])->name('educational-subjects.store');
    Route::put('/educational-subjects/{subject}', [EducationalSubjectController::class, 'update'])->name('educational-subjects.update');
@@ -106,6 +107,7 @@ Route::middleware(['auth', 'verified'])->prefix('admin')->name('admin.')->group(
     Route::patch('/educational-support-payments/{payment}/process-payment', [EducationalSupportPaymentController::class, 'processPayment'])->name('educational-support-payments.process-payment');
     Route::patch('/educational-support-payments/{payment}/mark-as-cancelled', [EducationalSupportPaymentController::class, 'markAsCancelled'])->name('educational-support-payments.mark-as-cancelled');
     Route::patch('/educational-support-payments/{payment}/update-amount', [EducationalSupportPaymentController::class, 'updateAmount'])->name('educational-support-payments.update-amount');
+    Route::patch('/educational-support-payments/{payment}/update-payment-date', [EducationalSupportPaymentController::class, 'updatePaymentDate'])->name('educational-support-payments.update-payment-date');
 
     // Childhood Education Routes
     Route::get('/childhood-subjects', [ChildhoodSubjectController::class, 'index'])->name('childhood-subjects.index');
@@ -123,6 +125,7 @@ Route::middleware(['auth', 'verified'])->prefix('admin')->name('admin.')->group(
     Route::patch('/childhood-payments/{payment}/process-payment', [ChildhoodPaymentController::class, 'processPayment'])->name('childhood-payments.process-payment');
     Route::patch('/childhood-payments/{payment}/mark-as-cancelled', [ChildhoodPaymentController::class, 'markAsCancelled'])->name('childhood-payments.mark-as-cancelled');
     Route::patch('/childhood-payments/{payment}/update-amount', [ChildhoodPaymentController::class, 'updateAmount'])->name('childhood-payments.update-amount');
+    Route::patch('/childhood-payments/{payment}/update-payment-date', [ChildhoodPaymentController::class, 'updatePaymentDate'])->name('childhood-payments.update-payment-date');
 });
 
 require __DIR__.'/auth.php';

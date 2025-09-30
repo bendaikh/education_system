@@ -95,8 +95,20 @@
                                     </span>
                                 </td>
                                 <td class="px-6 py-4 whitespace-nowrap">
-                                    <div class="text-sm text-gray-900">
-                                        {{ payment.payment_date ? formatDate(payment.payment_date) : 'Not set' }}
+                                    <div class="flex items-center gap-2">
+                                        <span class="text-sm text-gray-900">
+                                            {{ payment.payment_date ? formatDate(payment.payment_date) : 'Not set' }}
+                                        </span>
+                                        <button
+                                            v-if="payment.payment_date"
+                                            @click="openDateModal(payment)"
+                                            class="text-blue-600 hover:text-blue-900 transition-colors"
+                                            title="Update Payment Date"
+                                        >
+                                            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"></path>
+                                            </svg>
+                                        </button>
                                     </div>
                                 </td>
                                 <td class="px-6 py-4">
@@ -253,6 +265,42 @@
                 </form>
             </div>
         </Modal>
+
+        <!-- Update Payment Date Modal -->
+        <Modal :show="showDateModal" @close="closeDateModal">
+            <div class="p-6">
+                <h2 class="text-lg font-medium text-gray-900 mb-4">Update Payment Date</h2>
+
+                <form @submit.prevent="updatePaymentDate" class="space-y-4">
+                    <div>
+                        <label for="payment_date" class="block text-sm font-medium text-gray-700">Payment Date</label>
+                        <input
+                            id="payment_date"
+                            v-model="dateForm.payment_date"
+                            type="date"
+                            required
+                            class="mt-1 block w-full border-gray-300 rounded-md shadow-sm focus:ring-primary-500 focus:border-primary-500 sm:text-sm"
+                        />
+                    </div>
+
+                    <div class="flex justify-end space-x-3 pt-4">
+                        <button
+                            type="button"
+                            @click="closeDateModal"
+                            class="inline-flex items-center px-4 py-2 border border-gray-300 shadow-sm text-sm font-medium rounded-md text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-primary-500"
+                        >
+                            Cancel
+                        </button>
+                        <button
+                            type="submit"
+                            class="inline-flex items-center px-4 py-2 border border-transparent shadow-sm text-sm font-medium rounded-md text-white bg-primary-600 hover:bg-primary-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-primary-500"
+                        >
+                            Update Date
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </Modal>
     </AdminLayout>
 </template>
 
@@ -271,6 +319,7 @@ const { formatPrice, currencyInfo } = useCurrency();
 
 const showProcessModal = ref(false);
 const showUpdateAmountModal = ref(false);
+const showDateModal = ref(false);
 const selectedPayment = ref(null);
 
 const processForm = reactive({
@@ -280,6 +329,10 @@ const processForm = reactive({
 
 const updateAmountForm = reactive({
     amount: ''
+});
+
+const dateForm = reactive({
+    payment_date: ''
 });
 
 const markAsPaid = (paymentId) => {
@@ -336,8 +389,37 @@ const closeUpdateAmountModal = () => {
     updateAmountForm.amount = '';
 };
 
+const openDateModal = (payment) => {
+    selectedPayment.value = payment;
+    dateForm.payment_date = payment.payment_date || new Date().toISOString().split('T')[0];
+    showDateModal.value = true;
+};
+
+const closeDateModal = () => {
+    showDateModal.value = false;
+    selectedPayment.value = null;
+    dateForm.payment_date = '';
+};
+
+const updatePaymentDate = () => {
+    router.patch(`/admin/childhood-payments/${selectedPayment.value.id}/update-payment-date`, dateForm, {
+        onSuccess: () => {
+            closeDateModal();
+        }
+    });
+};
+
 const formatDate = (date) => {
-    return new Date(date).toLocaleDateString();
+    if (!date) return '-';
+    const value = typeof date === 'string' ? date : String(date);
+    // Normalize to the first 10 chars (YYYY-MM-DD) to avoid timezone shifts
+    const isoPrefix = value.substring(0, 10); // e.g., 2025-10-01 from 2025-10-01T00:00:00.000000Z
+    const ymd = /^\d{4}-\d{2}-\d{2}$/;
+    if (ymd.test(isoPrefix)) {
+        const [y, m, d] = isoPrefix.split('-');
+        return `${Number(m)}/${Number(d)}/${y}`;
+    }
+    return new Date(value).toLocaleDateString();
 };
 
 const getStatusClasses = (status) => {

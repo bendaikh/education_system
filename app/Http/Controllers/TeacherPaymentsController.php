@@ -57,17 +57,21 @@ class TeacherPaymentsController extends Controller
         $endOfMonth = $month->copy()->endOfMonth();
 
         // Use payment_date and pre-filter to paid (case-insensitive) for processing
-        $educationalPayments = EducationalSupportPayment::whereBetween('payment_date', [$startOfMonth, $endOfMonth])
+        // Only include payments that have a payment_date set and within the selected month
+        $educationalPayments = EducationalSupportPayment::whereNotNull('payment_date')
+            ->whereBetween('payment_date', [$startOfMonth, $endOfMonth])
             ->whereRaw('LOWER(status) = ?', ['paid'])
             ->with(['subscription.subject', 'subscription.student'])
             ->get();
 
-        $formationPayments = FormationPayment::whereBetween('payment_date', [$startOfMonth, $endOfMonth])
+        $formationPayments = FormationPayment::whereNotNull('payment_date')
+            ->whereBetween('payment_date', [$startOfMonth, $endOfMonth])
             ->whereRaw('LOWER(status) = ?', ['paid'])
             ->with(['subscription.formation', 'subscription.student'])
             ->get();
 
-        $childhoodPayments = ChildhoodPayment::whereBetween('payment_date', [$startOfMonth, $endOfMonth])
+        $childhoodPayments = ChildhoodPayment::whereNotNull('payment_date')
+            ->whereBetween('payment_date', [$startOfMonth, $endOfMonth])
             ->whereRaw('LOWER(status) = ?', ['paid'])
             ->with(['subscription.childhoodSubject', 'subscription.student'])
             ->get();
@@ -130,7 +134,7 @@ class TeacherPaymentsController extends Controller
                     'subject_name' => $subject->name,
                     'student_name' => $payment->subscription->student->name,
                     'amount' => $amountPerTeacher,
-                    'payment_date' => $payment->created_at->format('Y-m-d')
+                    'payment_date' => $payment->payment_date->format('Y-m-d')
                 ];
             }
 
@@ -149,22 +153,22 @@ class TeacherPaymentsController extends Controller
                 'subject_name' => $subject->name,
                 'student_name' => $payment->subscription->student->name,
                 'amount' => $schoolAmount,
-                'payment_date' => $payment->created_at->format('Y-m-d')
+                'payment_date' => $payment->payment_date->format('Y-m-d')
             ];
         }
 
-        // Process Formation payments
-        foreach ($formationPayments as $payment) {
-            
-            $formation = $payment->subscription->formation;
-            $teacherAmount = $payment->paid_amount * ($formation->teacher_percent / 100);
-            $schoolAmount = $payment->paid_amount * ($formation->school_percent / 100);
+    // Process Formation payments
+    foreach ($formationPayments as $payment) {
+        
+        $formation = $payment->subscription->formation;
+        $teacherAmount = $payment->paid_amount * ($formation->teacher_percent / 100);
+        $schoolAmount = $payment->paid_amount * ($formation->school_percent / 100);
 
-            // Get teachers for this formation (stored as JSON array)
-            $teacherIds = $formation->teachers ?? [];
-            $teachers = Teacher::whereIn('id', $teacherIds)->get();
-            $teacherCount = $teachers->count();
-            $amountPerTeacher = $teacherCount > 0 ? $teacherAmount / $teacherCount : 0;
+        // Get teachers for this formation (stored as JSON array)
+        $teacherIds = $formation->teachers ?? [];
+        $teachers = Teacher::whereIn('id', $teacherIds)->get();
+        $teacherCount = $teachers->count();
+        $amountPerTeacher = $teacherCount > 0 ? $teacherAmount / $teacherCount : 0;
 
             foreach ($teachers as $teacher) {
                 if (!isset($teacherInvoices[$teacher->id])) {
@@ -180,7 +184,7 @@ class TeacherPaymentsController extends Controller
                     'subject_name' => $formation->title,
                     'student_name' => $payment->subscription->student->name,
                     'amount' => $amountPerTeacher,
-                    'payment_date' => $payment->created_at->format('Y-m-d')
+                    'payment_date' => $payment->payment_date->format('Y-m-d')
                 ];
             }
 
@@ -199,7 +203,7 @@ class TeacherPaymentsController extends Controller
                 'subject_name' => $formation->title,
                 'student_name' => $payment->subscription->student->name,
                 'amount' => $schoolAmount,
-                'payment_date' => $payment->created_at->format('Y-m-d')
+                'payment_date' => $payment->payment_date->format('Y-m-d')
             ];
         }
 
@@ -229,7 +233,7 @@ class TeacherPaymentsController extends Controller
                     'subject_name' => $subject->name,
                     'student_name' => $payment->subscription->student->name,
                     'amount' => $amountPerTeacher,
-                    'payment_date' => $payment->created_at->format('Y-m-d')
+                    'payment_date' => $payment->payment_date->format('Y-m-d')
                 ];
             }
 
@@ -248,7 +252,7 @@ class TeacherPaymentsController extends Controller
                 'subject_name' => $subject->name,
                 'student_name' => $payment->subscription->student->name,
                 'amount' => $schoolAmount,
-                'payment_date' => $payment->created_at->format('Y-m-d')
+                'payment_date' => $payment->payment_date->format('Y-m-d')
             ];
         }
 
@@ -294,7 +298,8 @@ class TeacherPaymentsController extends Controller
         // Build entries from paid payments within month
         $entries = [];
 
-        $eduPayments = EducationalSupportPayment::whereBetween('payment_date', [$startOfMonth, $endOfMonth])
+        $eduPayments = EducationalSupportPayment::whereNotNull('payment_date')
+            ->whereBetween('payment_date', [$startOfMonth, $endOfMonth])
             ->whereRaw('LOWER(status) = ?', ['paid'])
             ->with(['subscription.subject', 'subscription.student'])
             ->get();
@@ -307,12 +312,13 @@ class TeacherPaymentsController extends Controller
                 'subject' => $subject->name,
                 'student' => $p->subscription->student->name,
                 'amount' => $share,
-                'date' => optional($p->payment_date ?? $p->created_at)->format('Y-m-d'),
+                'date' => $p->payment_date->format('Y-m-d'),
                 'teacher_percent' => (float) $subject->teacher_percent,
             ];
         }
 
-        $formationPayments = FormationPayment::whereBetween('payment_date', [$startOfMonth, $endOfMonth])
+        $formationPayments = FormationPayment::whereNotNull('payment_date')
+            ->whereBetween('payment_date', [$startOfMonth, $endOfMonth])
             ->whereRaw('LOWER(status) = ?', ['paid'])
             ->with(['subscription.formation', 'subscription.student'])
             ->get();
@@ -326,12 +332,13 @@ class TeacherPaymentsController extends Controller
                 'subject' => $formation->title,
                 'student' => $p->subscription->student->name,
                 'amount' => $share,
-                'date' => optional($p->payment_date ?? $p->created_at)->format('Y-m-d'),
+                'date' => $p->payment_date->format('Y-m-d'),
                 'teacher_percent' => (float) $formation->teacher_percent,
             ];
         }
 
-        $childPayments = ChildhoodPayment::whereBetween('payment_date', [$startOfMonth, $endOfMonth])
+        $childPayments = ChildhoodPayment::whereNotNull('payment_date')
+            ->whereBetween('payment_date', [$startOfMonth, $endOfMonth])
             ->whereRaw('LOWER(status) = ?', ['paid'])
             ->with(['subscription.childhoodSubject', 'subscription.student'])
             ->get();
@@ -344,7 +351,7 @@ class TeacherPaymentsController extends Controller
                 'subject' => $subject->name,
                 'student' => $p->subscription->student->name,
                 'amount' => $share,
-                'date' => optional($p->payment_date ?? $p->created_at)->format('Y-m-d'),
+                'date' => $p->payment_date->format('Y-m-d'),
                 'teacher_percent' => (float) $subject->teacher_percent,
             ];
         }
@@ -382,7 +389,8 @@ class TeacherPaymentsController extends Controller
 
         if ($request->category === 'educational_support') {
             $categoryLabel = 'Educational Support';
-            $payments = EducationalSupportPayment::whereBetween('payment_date', [$startOfMonth, $endOfMonth])
+            $payments = EducationalSupportPayment::whereNotNull('payment_date')
+                ->whereBetween('payment_date', [$startOfMonth, $endOfMonth])
                 ->whereRaw('LOWER(status) = ?', ['paid'])
                 ->with(['subscription.subject', 'subscription.student'])
                 ->get();
@@ -393,13 +401,14 @@ class TeacherPaymentsController extends Controller
                     'subject' => $subject->name,
                     'student' => $p->subscription->student->name,
                     'amount' => $amount,
-                    'date' => optional($p->payment_date ?? $p->created_at)->format('Y-m-d'),
+                    'date' => $p->payment_date->format('Y-m-d'),
                     'school_percent' => (float) $subject->school_percent,
                 ];
             }
         } elseif ($request->category === 'formations') {
             $categoryLabel = 'Formations';
-            $payments = FormationPayment::whereBetween('payment_date', [$startOfMonth, $endOfMonth])
+            $payments = FormationPayment::whereNotNull('payment_date')
+                ->whereBetween('payment_date', [$startOfMonth, $endOfMonth])
                 ->whereRaw('LOWER(status) = ?', ['paid'])
                 ->with(['subscription.formation', 'subscription.student'])
                 ->get();
@@ -410,13 +419,14 @@ class TeacherPaymentsController extends Controller
                     'subject' => $formation->title,
                     'student' => $p->subscription->student->name,
                     'amount' => $amount,
-                    'date' => optional($p->payment_date ?? $p->created_at)->format('Y-m-d'),
+                    'date' => $p->payment_date->format('Y-m-d'),
                     'school_percent' => (float) $formation->school_percent,
                 ];
             }
         } else {
             $categoryLabel = 'Childhood Education';
-            $payments = ChildhoodPayment::whereBetween('payment_date', [$startOfMonth, $endOfMonth])
+            $payments = ChildhoodPayment::whereNotNull('payment_date')
+                ->whereBetween('payment_date', [$startOfMonth, $endOfMonth])
                 ->whereRaw('LOWER(status) = ?', ['paid'])
                 ->with(['subscription.childhoodSubject', 'subscription.student'])
                 ->get();
@@ -427,7 +437,7 @@ class TeacherPaymentsController extends Controller
                     'subject' => $subject->name,
                     'student' => $p->subscription->student->name,
                     'amount' => $amount,
-                    'date' => optional($p->payment_date ?? $p->created_at)->format('Y-m-d'),
+                    'date' => $p->payment_date->format('Y-m-d'),
                     'school_percent' => (float) $subject->school_percent,
                 ];
             }

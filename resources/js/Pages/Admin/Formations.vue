@@ -81,6 +81,16 @@ const isTeacherSelected = (teacher) => {
   return formData.value.teachers.some(t => t.id === teacher.id);
 };
 
+// Get teacher names from IDs
+const getTeacherNames = (teacherIds) => {
+  if (!Array.isArray(teacherIds)) return '';
+  return teacherIds
+    .map(id => props.availableTeachers.find(t => t.id === id))
+    .filter(t => t !== undefined)
+    .map(t => t.name)
+    .join(', ');
+};
+
 // Remove teacher from selection
 const removeTeacher = (teacher) => {
   const index = formData.value.teachers.findIndex(t => t.id === teacher.id);
@@ -105,15 +115,17 @@ const openEditModal = (formation) => {
   formData.value = {
     title: formation.title || '',
     description: formation.description || '',
-    // We only stored teacher names in DB; map them to objects for UI chips
+    // Map teacher IDs to teacher objects from availableTeachers
     teachers: Array.isArray(formation.teachers)
-      ? formation.teachers.map((name, idx) => ({ id: idx + 1, name }))
-      : (formation.teachers ? [{ id: 1, name: formation.teachers }] : []),
+      ? formation.teachers
+          .map(teacherId => props.availableTeachers.find(t => t.id === teacherId))
+          .filter(t => t !== undefined)
+      : [],
     duration: formation.duration || '',
     level: formation.level || '',
     price: formation.price || '',
-    school_percent: formation.school_percent || 50,
-    teacher_percent: formation.teacher_percent || 50,
+    school_percent: (formation.school_percent ?? 50),
+    teacher_percent: (formation.teacher_percent ?? 50),
     status: formation.status || 'Active',
   };
 };
@@ -209,9 +221,7 @@ const filteredFormations = computed(() => {
   return formations.value.filter(formation => 
     formation.title.toLowerCase().includes(query) ||
     formation.description.toLowerCase().includes(query) ||
-    (Array.isArray(formation.teachers) ? 
-      formation.teachers.some(teacher => teacher.toLowerCase().includes(query)) :
-      formation.teachers.toLowerCase().includes(query)) ||
+    getTeacherNames(formation.teachers).toLowerCase().includes(query) ||
     (formation.level && formation.level.toLowerCase().includes(query)) ||
     formation.status.toLowerCase().includes(query)
   );
@@ -353,10 +363,7 @@ const getLevelClass = (level) => {
               </td>
               <td class="py-4 px-6">
                 <div class="text-sm text-gray-600">
-                  <span v-if="Array.isArray(formation.teachers)">
-                    {{ formation.teachers.join(', ') }}
-                  </span>
-                  <span v-else>{{ formation.teachers }}</span>
+                  {{ getTeacherNames(formation.teachers) || 'No teachers assigned' }}
                 </div>
               </td>
               <td class="py-4 px-6">
@@ -412,10 +419,7 @@ const getLevelClass = (level) => {
             <div class="flex-1 min-w-0">
               <h3 class="text-base font-medium text-gray-900 truncate">{{ formation.title }}</h3>
               <p class="text-sm text-gray-600 mt-1">
-                <span v-if="Array.isArray(formation.teachers)">
-                  {{ formation.teachers.join(', ') }}
-                </span>
-                <span v-else>{{ formation.teachers }}</span>
+                {{ getTeacherNames(formation.teachers) || 'No teachers assigned' }}
               </p>
             </div>
             <span :class="getStatusClass(formation.status)" class="px-2 py-1 text-xs font-medium rounded-full ml-3">

@@ -55,6 +55,7 @@ class FormationPaymentController extends Controller
 
         $request->validate([
             'paid_amount' => 'required|numeric|min:0|max:' . $remaining,
+            'payment_date' => 'required|date'
         ]);
 
         $newPaid = $currentPaid + (float) $request->paid_amount;
@@ -63,7 +64,7 @@ class FormationPaymentController extends Controller
         $payment->update([
             'paid_amount' => $newPaid,
             'status' => $status,
-            'payment_date' => Carbon::now(),
+            'payment_date' => $request->payment_date,
         ]);
 
         return back()->with('success', 'Payment processed');
@@ -73,6 +74,19 @@ class FormationPaymentController extends Controller
     {
         $payment->update(['status' => 'cancelled']);
         return back()->with('success', 'Payment cancelled');
+    }
+
+    public function updatePaymentDate(Request $request, FormationPayment $payment)
+    {
+        $request->validate([
+            'payment_date' => 'required|date'
+        ]);
+
+        $payment->update([
+            'payment_date' => $request->payment_date
+        ]);
+
+        return back()->with('success', 'Payment date updated successfully');
     }
 }
 

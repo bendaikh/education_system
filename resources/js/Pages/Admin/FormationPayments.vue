@@ -9,13 +9,15 @@ const props = defineProps({
 
 const showModal = ref(false);
 const showAmountModal = ref(false);
+const showDateModal = ref(false);
 const activePayment = ref(null);
-const form = ref({ paid_amount: '' });
+const form = ref({ paid_amount: '', payment_date: '' });
 const amountForm = ref({ amount: '' });
+const dateForm = ref({ payment_date: '' });
 
 const openProcessModal = (payment) => {
   activePayment.value = payment;
-  form.value = { paid_amount: '' };
+  form.value = { paid_amount: '', payment_date: new Date().toISOString().split('T')[0] };
   showModal.value = true;
 };
 const closeModal = () => { showModal.value = false; activePayment.value = null; };
@@ -34,6 +36,16 @@ const closeAmountModal = () => { showAmountModal.value = false; activePayment.va
 const updateAmount = () => {
   if (!activePayment.value) return;
   router.patch(`/admin/formation-payments/${activePayment.value.id}/update-amount`, amountForm.value, { onSuccess: closeAmountModal });
+};
+const openDateModal = (payment) => {
+  activePayment.value = payment;
+  dateForm.value = { payment_date: payment.payment_date || new Date().toISOString().split('T')[0] };
+  showDateModal.value = true;
+};
+const closeDateModal = () => { showDateModal.value = false; activePayment.value = null; };
+const updatePaymentDate = () => {
+  if (!activePayment.value) return;
+  router.patch(`/admin/formation-payments/${activePayment.value.id}/update-payment-date`, dateForm.value, { onSuccess: closeDateModal });
 };
 </script>
 
@@ -81,7 +93,14 @@ const updateAmount = () => {
                 'bg-red-100 text-red-800': p.status === 'Cancelled'
               }">{{ p.status }}</span>
             </td>
-            <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-700">{{ p.payment_date || '—' }}</td>
+            <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-700">
+              <div class="flex items-center gap-2">
+                <span>{{ p.payment_date || '—' }}</span>
+                <button v-if="p.payment_date" @click="openDateModal(p)" class="p-1 rounded hover:bg-indigo-50 text-indigo-600" title="Update Payment Date">
+                  <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"/></svg>
+                </button>
+              </div>
+            </td>
             <td class="px-6 py-4 whitespace-nowrap text-sm font-medium">
               <div class="flex items-center gap-2">
                 <button @click="markAsPaid(p)" class="p-2 rounded hover:bg-green-50 text-green-600" title="Mark as Paid">
@@ -106,9 +125,15 @@ const updateAmount = () => {
       <div class="bg-white rounded-xl w-full max-w-md p-6">
         <h3 class="text-lg font-semibold mb-1">Process Payment</h3>
         <p class="text-sm text-gray-600 mb-4">Total: {{ Number(activePayment?.amount || 0).toFixed(2) }}</p>
-        <div>
-          <label class="block text-sm font-medium mb-1">Paid Amount</label>
-          <input v-model.number="form.paid_amount" type="number" min="0" step="0.01" class="w-full border rounded-lg px-3 py-2" />
+        <div class="space-y-4">
+          <div>
+            <label class="block text-sm font-medium mb-1">Paid Amount</label>
+            <input v-model.number="form.paid_amount" type="number" min="0" step="0.01" class="w-full border rounded-lg px-3 py-2" />
+          </div>
+          <div>
+            <label class="block text-sm font-medium mb-1">Payment Date</label>
+            <input v-model="form.payment_date" type="date" required class="w-full border rounded-lg px-3 py-2" />
+          </div>
         </div>
         <div class="mt-6 flex justify-end gap-3">
           <button @click="closeModal" class="px-4 py-2 rounded-lg border">Close</button>
@@ -128,6 +153,21 @@ const updateAmount = () => {
         <div class="mt-6 flex justify-end gap-3">
           <button @click="closeAmountModal" class="px-4 py-2 rounded-lg border">Close</button>
           <button @click="updateAmount" class="px-4 py-2 rounded-lg bg-indigo-600 text-white">Save</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- Update Payment Date Modal -->
+    <div v-if="showDateModal" class="fixed inset-0 z-50 flex items-center justify-center bg-black/40 p-4">
+      <div class="bg-white rounded-xl w-full max-w-md p-6">
+        <h3 class="text-lg font-semibold mb-1">Update Payment Date</h3>
+        <div>
+          <label class="block text-sm font-medium mb-1">Payment Date</label>
+          <input v-model="dateForm.payment_date" type="date" required class="w-full border rounded-lg px-3 py-2" />
+        </div>
+        <div class="mt-6 flex justify-end gap-3">
+          <button @click="closeDateModal" class="px-4 py-2 rounded-lg border">Close</button>
+          <button @click="updatePaymentDate" class="px-4 py-2 rounded-lg bg-indigo-600 text-white">Save</button>
         </div>
       </div>
     </div>

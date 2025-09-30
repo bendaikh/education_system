@@ -42,6 +42,8 @@ class FormationController extends Controller
             'duration' => 'nullable|string',
             'level' => 'nullable|string',
             'price' => 'required|string',
+            'school_percent' => 'required|numeric|min:0|max:100',
+            'teacher_percent' => 'required|numeric|min:0|max:100',
             'status' => 'required|string|in:Active,Coming Soon,Completed'
         ]);
 
@@ -49,10 +51,12 @@ class FormationController extends Controller
         $formation = Formation::create([
             'title' => $validated['title'],
             'description' => $validated['description'],
-            'teachers' => array_column($validated['teachers'], 'name'),
+            'teachers' => array_column($validated['teachers'], 'id'),
             'duration' => $validated['duration'],
             'level' => $validated['level'],
             'price' => $validated['price'],
+            'school_percent' => $validated['school_percent'],
+            'teacher_percent' => $validated['teacher_percent'],
             'status' => $validated['status'],
             'enrolled_students' => 0
         ]);
@@ -74,16 +78,20 @@ class FormationController extends Controller
             'duration' => 'nullable|string',
             'level' => 'nullable|string',
             'price' => 'required|string',
+            'school_percent' => 'required|numeric|min:0|max:100',
+            'teacher_percent' => 'required|numeric|min:0|max:100',
             'status' => 'required|string|in:Active,Coming Soon,Completed'
         ]);
 
         $formation->update([
             'title' => $validated['title'],
             'description' => $validated['description'],
-            'teachers' => array_column($validated['teachers'], 'name'),
+            'teachers' => array_column($validated['teachers'], 'id'),
             'duration' => $validated['duration'],
             'level' => $validated['level'],
             'price' => $validated['price'],
+            'school_percent' => $validated['school_percent'],
+            'teacher_percent' => $validated['teacher_percent'],
             'status' => $validated['status'],
         ]);
 

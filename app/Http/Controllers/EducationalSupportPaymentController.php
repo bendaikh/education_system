@@ -39,6 +39,7 @@ class EducationalSupportPaymentController extends Controller
         
         $request->validate([
             'paid_amount' => 'required|numeric|min:0|max:' . $remainingAmount,
+            'payment_date' => 'required|date'
         ]);
 
         $newPaidAmount = $request->paid_amount;
@@ -52,7 +53,7 @@ class EducationalSupportPaymentController extends Controller
         $payment->update([
             'paid_amount' => $totalPaidAmount,
             'status' => $status,
-            'payment_date' => Carbon::now(),
+            'payment_date' => $request->payment_date,
             'notes' => $newRemainingAmount > 0 ? "Remaining balance: $" . number_format($newRemainingAmount, 2) : 'Payment completed'
         ]);
 
@@ -79,6 +80,19 @@ class EducationalSupportPaymentController extends Controller
         ]);
 
         return redirect()->back()->with('success', 'Payment amount updated successfully.');
+    }
+
+    public function updatePaymentDate(Request $request, EducationalSupportPayment $payment)
+    {
+        $request->validate([
+            'payment_date' => 'required|date'
+        ]);
+
+        $payment->update([
+            'payment_date' => $request->payment_date
+        ]);
+
+        return redirect()->back()->with('success', 'Payment date updated successfully.');
     }
 
     private function getLanguageData()
