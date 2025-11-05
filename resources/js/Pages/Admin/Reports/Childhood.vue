@@ -65,16 +65,17 @@ const subsChart = computed(() => ({
       <div class="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-8">
         <div class="border rounded-lg p-4">
           <div class="text-sm font-semibold mb-3">Payments (12 months)</div>
-          <div class="h-56"><Line :data="paymentsChart" :options="{responsive:true,maintainAspectRatio:false,plugins:{legend:{display:false}}}" /></div>
+          <div class="h-48 sm:h-56"><Line :data="paymentsChart" :options="{responsive:true,maintainAspectRatio:false,plugins:{legend:{display:false}}}" /></div>
         </div>
         <div class="border rounded-lg p-4">
           <div class="text-sm font-semibold mb-3">Subscriptions (12 months)</div>
-          <div class="h-56"><Line :data="subsChart" :options="{responsive:true,maintainAspectRatio:false,plugins:{legend:{display:false}}}" /></div>
+          <div class="h-48 sm:h-56"><Line :data="subsChart" :options="{responsive:true,maintainAspectRatio:false,plugins:{legend:{display:false}}}" /></div>
         </div>
       </div>
 
       <h2 class="text-lg font-semibold text-gray-900 mb-2">Recent Payments</h2>
-      <div class="overflow-x-auto mb-2">
+      <!-- Desktop Table -->
+      <div class="hidden sm:block overflow-x-auto mb-2">
         <table class="min-w-full">
           <thead>
             <tr class="border-b">
@@ -94,13 +95,28 @@ const subsChart = computed(() => ({
           </tbody>
         </table>
       </div>
+      <!-- Mobile Card List -->
+      <div class="sm:hidden divide-y rounded-md border mb-2">
+        <div v-for="p in (props.payments?.data || [])" :key="p?.id" class="p-3">
+          <div class="flex items-center justify-between">
+            <div class="text-sm font-medium text-gray-900">#{{ p?.id }}</div>
+            <div class="text-sm text-gray-500">{{ p?.date }}</div>
+          </div>
+          <div class="mt-1 text-sm text-gray-600">Amount: <span class="font-medium text-gray-900">{{ (p?.amount ?? 0).toLocaleString() }}</span></div>
+          <div class="mt-1 text-xs inline-flex px-2 py-0.5 rounded-full"
+               :class="p?.status === 'Paid' || p?.status === 'Completed' ? 'bg-green-100 text-green-700' : p?.status === 'Pending' ? 'bg-yellow-100 text-yellow-800' : 'bg-gray-100 text-gray-700'">
+            {{ p?.status || 'N/A' }}
+          </div>
+        </div>
+      </div>
       <div class="flex items-center gap-2 mb-6">
         <InertiaLink v-for="link in props.payments?.links || []" :key="link.label" :href="link.url || '#'" :preserve-scroll="true"
           class="px-3 py-1 rounded border text-sm" :class="[link.active ? 'bg-gray-900 text-white' : 'bg-white text-gray-700 hover:bg-gray-50', !link.url ? 'opacity-50 cursor-not-allowed' : '']" v-html="link.label" />
       </div>
 
       <h2 class="text-lg font-semibold text-gray-900 mb-2">Recent Subscriptions</h2>
-      <div class="overflow-x-auto mb-2">
+      <!-- Desktop Table -->
+      <div class="hidden sm:block overflow-x-auto mb-2">
         <table class="min-w-full">
           <thead>
             <tr class="border-b">
@@ -117,6 +133,19 @@ const subsChart = computed(() => ({
             </tr>
           </tbody>
         </table>
+      </div>
+      <!-- Mobile Card List -->
+      <div class="sm:hidden divide-y rounded-md border mb-2">
+        <div v-for="s in (props.subscriptions?.data || [])" :key="s?.id" class="p-3">
+          <div class="flex items-center justify-between">
+            <div class="text-sm font-medium text-gray-900">#{{ s?.id }}</div>
+            <div class="text-sm text-gray-500">{{ s?.date }}</div>
+          </div>
+          <div class="mt-1 text-xs inline-flex px-2 py-0.5 rounded-full"
+               :class="s?.status === 'Active' || s?.status === 'Completed' ? 'bg-green-100 text-green-700' : s?.status === 'Pending' ? 'bg-yellow-100 text-yellow-800' : 'bg-gray-100 text-gray-700'">
+            {{ s?.status || 'N/A' }}
+          </div>
+        </div>
       </div>
       <div class="flex items-center gap-2">
         <InertiaLink v-for="link in props.subscriptions?.links || []" :key="link.label" :href="link.url || '#'" :preserve-scroll="true"

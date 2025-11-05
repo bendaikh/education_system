@@ -47,12 +47,13 @@ const countsChart = computed(() => ({
         </div>
         <div class="md:col-span-2 border rounded-lg p-4">
           <div class="text-sm font-semibold mb-3">Students Added (12 months)</div>
-          <div class="h-56"><Line :data="countsChart" :options="{responsive:true,maintainAspectRatio:false,plugins:{legend:{display:false}}}" /></div>
+          <div class="h-48 sm:h-56"><Line :data="countsChart" :options="{responsive:true,maintainAspectRatio:false,plugins:{legend:{display:false}}}" /></div>
         </div>
       </div>
 
       <h2 class="text-lg font-semibold text-gray-900 mb-2">Recent Students</h2>
-      <div class="overflow-x-auto mb-2">
+      <!-- Desktop Table -->
+      <div class="hidden sm:block overflow-x-auto mb-2">
         <table class="min-w-full">
           <thead>
             <tr class="border-b">
@@ -69,6 +70,16 @@ const countsChart = computed(() => ({
             </tr>
           </tbody>
         </table>
+      </div>
+      <!-- Mobile Card List -->
+      <div class="sm:hidden divide-y rounded-md border mb-2">
+        <div v-for="s in (props.recent?.data || [])" :key="s?.id" class="p-3">
+          <div class="flex items-center justify-between">
+            <div class="text-sm font-medium text-gray-900">#{{ s?.id }}</div>
+            <div class="text-sm text-gray-500">{{ s?.created }}</div>
+          </div>
+          <div class="mt-1 text-sm text-gray-600">Name: <span class="font-medium text-gray-900">{{ s?.name }}</span></div>
+        </div>
       </div>
       <div class="flex items-center gap-2">
         <InertiaLink v-for="link in props.recent?.links || []" :key="link.label" :href="link.url || '#'" :preserve-scroll="true"
