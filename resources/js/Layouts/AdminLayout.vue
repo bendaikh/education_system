@@ -131,22 +131,20 @@ const navItems = computed(() => {
                 { label: language.childhood_payments || 'Childhood Payments', href: '/admin/childhood-payments' },
             ]
         },
-        { label: language.payments || 'Payments', href: '/admin/payments' },
-        { 
-            label: language.subscriptions || 'Subscriptions', 
-            key: 'subscriptions',
+        {
+            label: language.reports || 'Reports',
+            key: 'reports',
             hasSubmenu: true,
             subitems: [
-                { 
-                    label: language.manage_subscription_types || 'Manage Subscription Types', 
-                    href: '/admin/subscriptions/types' 
-                },
-                { 
-                    label: language.manage_subscriptions || 'Manage Subscriptions', 
-                    href: '/admin/subscriptions' 
-                }
+                { label: (language.educational_support || 'Educational Support') + ' Reports', href: '/admin/reports/educational-support' },
+                { label: (language.formations || 'Formations') + ' Reports', href: '/admin/reports/formations' },
+                { label: (language.childhood_education || 'Childhood Education') + ' Reports', href: '/admin/reports/childhood' },
+                { label: (language.teachers || 'Teachers') + ' Reports', href: '/admin/reports/teachers' },
+                { label: (language.students || 'Students') + ' Reports', href: '/admin/reports/students' },
+                { label: (language.overview || 'Reports Overview'), href: '/admin/reports' },
             ]
         },
+        
     ];
 });
 </script>

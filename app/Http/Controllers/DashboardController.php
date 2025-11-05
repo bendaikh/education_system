@@ -8,6 +8,12 @@ use App\Models\Teacher;
 use App\Models\Formation;
 use App\Models\Payment;
 use App\Models\Subscription;
+use App\Models\EducationalSupportPayment;
+use App\Models\EducationalSupportSubscription;
+use App\Models\FormationPayment;
+use App\Models\FormationSubscription;
+use App\Models\ChildhoodPayment;
+use App\Models\ChildhoodSubscription;
 use App\Models\SubscriptionType;
 use Illuminate\Http\Request;
 use Inertia\Inertia;
@@ -25,18 +31,40 @@ class DashboardController extends Controller
             'totalUsers' => User::count(),
         ];
 
-        // Monthly payments data for the line chart (last 12 months)
+        // Monthly payments data by category for the line chart (last 12 months)
         $monthlyPayments = [];
+        $monthlyPaymentsByCategory = [
+            'labels' => [],
+            'educational_support' => [],
+            'formations' => [],
+            'childhood' => [],
+        ];
         for ($i = 11; $i >= 0; $i--) {
             $date = Carbon::now()->subMonths($i);
             $monthName = $date->format('M');
-            $monthlyTotal = Payment::whereYear('created_at', $date->year)
-                                  ->whereMonth('created_at', $date->month)
-                                  ->sum('amount');
+
+            // Aggregate per-category
+            $eduSupport = (float) EducationalSupportPayment::whereYear('created_at', $date->year)
+                ->whereMonth('created_at', $date->month)
+                ->sum('paid_amount');
+            $formations = (float) FormationPayment::whereYear('created_at', $date->year)
+                ->whereMonth('created_at', $date->month)
+                ->sum('amount');
+            $childhood = (float) ChildhoodPayment::whereYear('created_at', $date->year)
+                ->whereMonth('created_at', $date->month)
+                ->sum('amount');
+
+            // Backward compatibility total
             $monthlyPayments[] = [
                 'month' => $monthName,
-                'amount' => (float) $monthlyTotal
+                'amount' => $eduSupport + $formations + $childhood,
             ];
+
+            // Fill multi-series structure
+            $monthlyPaymentsByCategory['labels'][] = $monthName;
+            $monthlyPaymentsByCategory['educational_support'][] = $eduSupport;
+            $monthlyPaymentsByCategory['formations'][] = $formations;
+            $monthlyPaymentsByCategory['childhood'][] = $childhood;
         }
 
         // Calculate total revenue
@@ -95,13 +123,31 @@ class DashboardController extends Controller
                                        ->values()
                                        ->toArray();
 
+        // Category stats: payments total and subscriptions count per domain
+        $categoryStats = [
+            'educational_support' => [
+                'paymentsTotal' => (float) EducationalSupportPayment::sum('paid_amount'),
+                'subscriptionsCount' => (int) EducationalSupportSubscription::count(),
+            ],
+            'formations' => [
+                'paymentsTotal' => (float) FormationPayment::sum('amount'),
+                'subscriptionsCount' => (int) FormationSubscription::count(),
+            ],
+            'childhood' => [
+                'paymentsTotal' => (float) ChildhoodPayment::sum('amount'),
+                'subscriptionsCount' => (int) ChildhoodSubscription::count(),
+            ],
+        ];
+
         return Inertia::render('Admin/Dashboard', [
             'stats' => $stats,
             'totalRevenue' => $totalRevenue,
             'monthlyPayments' => $monthlyPayments,
+            'monthlyPaymentsByCategory' => $monthlyPaymentsByCategory,
             'subscriptionStats' => $subscriptionStats,
             'totalActiveSubscriptions' => $totalActiveSubscriptions,
-            'recentActivity' => $recentActivity
+            'recentActivity' => $recentActivity,
+            'categoryStats' => $categoryStats,
         ]);
     }
 }

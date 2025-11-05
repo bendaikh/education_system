@@ -24,6 +24,7 @@ use Illuminate\Foundation\Application;
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\HomeController;
 use Inertia\Inertia;
+use App\Http\Controllers\ReportsController;
 
 Route::get('/', HomeController::class);
 
@@ -126,6 +127,14 @@ Route::middleware(['auth', 'verified'])->prefix('admin')->name('admin.')->group(
     Route::patch('/childhood-payments/{payment}/mark-as-cancelled', [ChildhoodPaymentController::class, 'markAsCancelled'])->name('childhood-payments.mark-as-cancelled');
     Route::patch('/childhood-payments/{payment}/update-amount', [ChildhoodPaymentController::class, 'updateAmount'])->name('childhood-payments.update-amount');
     Route::patch('/childhood-payments/{payment}/update-payment-date', [ChildhoodPaymentController::class, 'updatePaymentDate'])->name('childhood-payments.update-payment-date');
+
+   // Reports
+   Route::get('/reports', [ReportsController::class, 'index'])->name('reports.index');
+   Route::get('/reports/educational-support', [ReportsController::class, 'educationalSupport'])->name('reports.educational-support');
+   Route::get('/reports/formations', [ReportsController::class, 'formations'])->name('reports.formations');
+   Route::get('/reports/childhood', [ReportsController::class, 'childhood'])->name('reports.childhood');
+   Route::get('/reports/teachers', [ReportsController::class, 'teachers'])->name('reports.teachers');
+   Route::get('/reports/students', [ReportsController::class, 'students'])->name('reports.students');
 });
 
 require __DIR__.'/auth.php';

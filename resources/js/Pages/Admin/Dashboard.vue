@@ -11,10 +11,9 @@ import {
   LineElement,
   Title,
   Tooltip,
-  Legend,
-  ArcElement
+  Legend
 } from 'chart.js'
-import { Line, Doughnut } from 'vue-chartjs'
+import { Line } from 'vue-chartjs'
 
 ChartJS.register(
   CategoryScale,
@@ -23,8 +22,7 @@ ChartJS.register(
   LineElement,
   Title,
   Tooltip,
-  Legend,
-  ArcElement
+  Legend
 )
 
 const page = usePage();
@@ -36,9 +34,11 @@ const props = defineProps({
   stats: Object,
   totalRevenue: Number,
   monthlyPayments: Array,
+  monthlyPaymentsByCategory: Object,
   subscriptionStats: Array,
   totalActiveSubscriptions: Number,
-  recentActivity: Array
+  recentActivity: Array,
+  categoryStats: Object
 });
 
 // Transform stats data for display
@@ -78,29 +78,59 @@ const statsCards = computed(() => [
 ]);
 
 // Chart configurations
-const paymentChartData = computed(() => ({
-  labels: props.monthlyPayments?.map(p => p.month) || [],
-  datasets: [
+const paymentChartData = computed(() => {
+  const labels = props.monthlyPaymentsByCategory?.labels || props.monthlyPayments?.map(p => p.month) || [];
+  const eduData = props.monthlyPaymentsByCategory?.educational_support || [];
+  const formData = props.monthlyPaymentsByCategory?.formations || [];
+  const childData = props.monthlyPaymentsByCategory?.childhood || [];
+
+  const datasets = [
     {
-      label: 'Payments',
-      data: props.monthlyPayments?.map(p => p.amount) || [],
+      label: 'Educational Support',
+      data: eduData.length ? eduData : [],
       borderColor: '#3B82F6',
       backgroundColor: '#3B82F6',
       tension: 0.4,
       pointBackgroundColor: '#3B82F6',
       pointBorderColor: '#3B82F6',
-      pointRadius: 6,
-      pointHoverRadius: 8
+      pointRadius: 5,
+      pointHoverRadius: 7
+    },
+    {
+      label: 'Formations',
+      data: formData.length ? formData : [],
+      borderColor: '#F59E0B',
+      backgroundColor: '#F59E0B',
+      tension: 0.4,
+      pointBackgroundColor: '#F59E0B',
+      pointBorderColor: '#F59E0B',
+      pointRadius: 5,
+      pointHoverRadius: 7
+    },
+    {
+      label: 'Childhood Education',
+      data: childData.length ? childData : [],
+      borderColor: '#10B981',
+      backgroundColor: '#10B981',
+      tension: 0.4,
+      pointBackgroundColor: '#10B981',
+      pointBorderColor: '#10B981',
+      pointRadius: 5,
+      pointHoverRadius: 7
     }
-  ]
-}));
+  ];
+
+  return { labels, datasets };
+});
 
 const paymentChartOptions = {
   responsive: true,
   maintainAspectRatio: false,
   plugins: {
     legend: {
-      display: false
+      display: true,
+      position: 'top',
+      labels: { usePointStyle: true }
     },
     tooltip: {
       callbacks: {
@@ -169,20 +199,28 @@ const subscriptionChartOptions = {
   }
 };
 
-// Calculate payment trend
+// Calculate payment trend (sum across categories if provided)
 const paymentTrend = computed(() => {
+  if (props.monthlyPaymentsByCategory && props.monthlyPaymentsByCategory.labels?.length >= 2) {
+    const len = props.monthlyPaymentsByCategory.labels.length;
+    const sumAt = (idx) => (
+      (props.monthlyPaymentsByCategory.educational_support?.[idx] || 0) +
+      (props.monthlyPaymentsByCategory.formations?.[idx] || 0) +
+      (props.monthlyPaymentsByCategory.childhood?.[idx] || 0)
+    );
+    const last = sumAt(len - 1);
+    const prev = sumAt(len - 2);
+    if (prev === 0) return { value: 0, isPositive: true };
+    const pct = ((last - prev) / prev) * 100;
+    return { value: Math.abs(pct).toFixed(1), isPositive: pct >= 0 };
+  }
+
   if (!props.monthlyPayments || props.monthlyPayments.length < 2) return { value: 0, isPositive: true };
-  
   const lastMonth = props.monthlyPayments[props.monthlyPayments.length - 1]?.amount || 0;
   const previousMonth = props.monthlyPayments[props.monthlyPayments.length - 2]?.amount || 0;
-  
   if (previousMonth === 0) return { value: 0, isPositive: true };
-  
   const percentage = ((lastMonth - previousMonth) / previousMonth * 100);
-  return {
-    value: Math.abs(percentage).toFixed(1),
-    isPositive: percentage >= 0
-  };
+  return { value: Math.abs(percentage).toFixed(1), isPositive: percentage >= 0 };
 });
 
 const todo_write = (merge, todos) => {
@@ -271,39 +309,52 @@ onMounted(() => {
           <Line :data="paymentChartData" :options="paymentChartOptions" />
         </div>
       </div>
+    </div>
 
-      <!-- Active Subscriptions Chart -->
-      <div class="bg-gradient-to-br from-purple-500 to-purple-700 rounded-xl shadow-sm p-6 text-white">
-        <div class="flex items-center justify-between mb-6">
-          <h2 class="text-lg font-semibold">Active Subscriptions</h2>
-          <button class="p-1 hover:bg-white/10 rounded-lg">
-            <svg class="w-5 h-5 text-white/80" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 5v.01M12 12v.01M12 19v.01M12 6a1 1 0 110-2 1 1 0 010 2zm0 7a1 1 0 110-2 1 1 0 010 2zm0 7a1 1 0 110-2 1 1 0 010 2z"></path>
-            </svg>
-          </button>
+  <!-- By Category: Payments & Subscriptions -->
+  <div class="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
+    <div class="bg-white rounded-xl shadow-sm border border-gray-100 p-6">
+      <h3 class="text-sm font-medium text-gray-600 mb-4">Educational Support</h3>
+      <div class="space-y-2">
+        <div class="flex items-center justify-between">
+          <span class="text-sm text-gray-500">Payments Total</span>
+          <span class="text-base font-semibold text-gray-900">{{ formatLargeAmount(props.categoryStats?.educational_support?.paymentsTotal || 0) }}</span>
         </div>
-        
-        <div class="flex items-center justify-center mb-6">
-          <div class="relative w-32 h-32">
-            <Doughnut :data="subscriptionChartData" :options="subscriptionChartOptions" />
-          </div>
-        </div>
-
-        <!-- Legend -->
-        <div class="space-y-3">
-          <div v-for="(subscription, index) in subscriptionStats" :key="subscription.name" class="flex items-center justify-between">
-            <div class="flex items-center gap-2">
-              <div :class="[
-                'w-3 h-3 rounded-full',
-                index === 0 ? 'bg-gray-300' : index === 1 ? 'bg-purple-300' : 'bg-white'
-              ]"></div>
-              <span class="text-sm font-medium">{{ subscription.name }}</span>
-            </div>
-            <span class="text-sm font-medium">{{ subscription.count }}</span>
-          </div>
+        <div class="flex items-center justify-between">
+          <span class="text-sm text-gray-500">Subscriptions</span>
+          <span class="text-base font-semibold text-gray-900">{{ props.categoryStats?.educational_support?.subscriptionsCount || 0 }}</span>
         </div>
       </div>
     </div>
+
+    <div class="bg-white rounded-xl shadow-sm border border-gray-100 p-6">
+      <h3 class="text-sm font-medium text-gray-600 mb-4">Formations</h3>
+      <div class="space-y-2">
+        <div class="flex items-center justify-between">
+          <span class="text-sm text-gray-500">Payments Total</span>
+          <span class="text-base font-semibold text-gray-900">{{ formatLargeAmount(props.categoryStats?.formations?.paymentsTotal || 0) }}</span>
+        </div>
+        <div class="flex items-center justify-between">
+          <span class="text-sm text-gray-500">Subscriptions</span>
+          <span class="text-base font-semibold text-gray-900">{{ props.categoryStats?.formations?.subscriptionsCount || 0 }}</span>
+        </div>
+      </div>
+    </div>
+
+    <div class="bg-white rounded-xl shadow-sm border border-gray-100 p-6">
+      <h3 class="text-sm font-medium text-gray-600 mb-4">Childhood Education</h3>
+      <div class="space-y-2">
+        <div class="flex items-center justify-between">
+          <span class="text-sm text-gray-500">Payments Total</span>
+          <span class="text-base font-semibold text-gray-900">{{ formatLargeAmount(props.categoryStats?.childhood?.paymentsTotal || 0) }}</span>
+        </div>
+        <div class="flex items-center justify-between">
+          <span class="text-sm text-gray-500">Subscriptions</span>
+          <span class="text-base font-semibold text-gray-900">{{ props.categoryStats?.childhood?.subscriptionsCount || 0 }}</span>
+        </div>
+      </div>
+    </div>
+  </div>
 
     <!-- Recent Activity Section -->
     <div class="bg-white rounded-xl shadow-sm border border-gray-100">
