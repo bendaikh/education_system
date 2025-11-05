@@ -52,7 +52,7 @@ const countsChart = computed(() => ({
       </div>
 
       <h2 class="text-lg font-semibold text-gray-900 mb-2">Recent Teachers</h2>
-      <div class="overflow-x-auto">
+      <div class="overflow-x-auto mb-2">
         <table class="min-w-full">
           <thead>
             <tr class="border-b">
@@ -62,13 +62,17 @@ const countsChart = computed(() => ({
             </tr>
           </thead>
           <tbody class="divide-y">
-            <tr v-for="t in props.recent" :key="t.id">
-              <td class="py-2 px-3 text-sm">{{ t.id }}</td>
-              <td class="py-2 px-3 text-sm">{{ t.name }}</td>
-              <td class="py-2 px-3 text-sm">{{ t.created }}</td>
+            <tr v-for="t in (props.recent?.data || [])" :key="t?.id">
+              <td class="py-2 px-3 text-sm">{{ t?.id }}</td>
+              <td class="py-2 px-3 text-sm">{{ t?.name }}</td>
+              <td class="py-2 px-3 text-sm">{{ t?.created }}</td>
             </tr>
           </tbody>
         </table>
+      </div>
+      <div class="flex items-center gap-2">
+        <inertia-link v-for="link in props.recent?.links || []" :key="link.label" :href="link.url || '#'" :preserve-scroll="true"
+          class="px-3 py-1 rounded border text-sm" :class="[link.active ? 'bg-gray-900 text-white' : 'bg-white text-gray-700 hover:bg-gray-50', !link.url ? 'opacity-50 cursor-not-allowed' : '']" v-html="link.label" />
       </div>
     </div>
   </AdminLayout>

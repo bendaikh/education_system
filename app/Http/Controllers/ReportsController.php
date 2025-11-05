@@ -83,9 +83,8 @@ class ReportsController extends Controller
     public function educationalSupport()
     {
         $payments = EducationalSupportPayment::latest()
-            ->take(100)
-            ->get()
-            ->map(function ($p) {
+            ->paginate(15)
+            ->through(function ($p) {
                 return [
                     'id' => $p->id,
                     'amount' => (float) ($p->paid_amount ?? $p->amount ?? 0),
@@ -95,9 +94,8 @@ class ReportsController extends Controller
             });
 
         $subscriptions = EducationalSupportSubscription::latest()
-            ->take(100)
-            ->get()
-            ->map(function ($s) {
+            ->paginate(15)
+            ->through(function ($s) {
                 return [
                     'id' => $s->id,
                     'status' => $s->status ?? 'N/A',
@@ -141,9 +139,8 @@ class ReportsController extends Controller
     public function formations()
     {
         $payments = FormationPayment::latest()
-            ->take(100)
-            ->get()
-            ->map(function ($p) {
+            ->paginate(15)
+            ->through(function ($p) {
                 return [
                     'id' => $p->id,
                     'amount' => (float) ($p->amount ?? 0),
@@ -153,9 +150,8 @@ class ReportsController extends Controller
             });
 
         $subscriptions = FormationSubscription::latest()
-            ->take(100)
-            ->get()
-            ->map(function ($s) {
+            ->paginate(15)
+            ->through(function ($s) {
                 return [
                     'id' => $s->id,
                     'status' => $s->status ?? 'N/A',
@@ -198,9 +194,8 @@ class ReportsController extends Controller
     public function childhood()
     {
         $payments = ChildhoodPayment::latest()
-            ->take(100)
-            ->get()
-            ->map(function ($p) {
+            ->paginate(15)
+            ->through(function ($p) {
                 return [
                     'id' => $p->id,
                     'amount' => (float) ($p->amount ?? 0),
@@ -210,9 +205,8 @@ class ReportsController extends Controller
             });
 
         $subscriptions = ChildhoodSubscription::latest()
-            ->take(100)
-            ->get()
-            ->map(function ($s) {
+            ->paginate(15)
+            ->through(function ($s) {
                 return [
                     'id' => $s->id,
                     'status' => $s->status ?? 'N/A',
@@ -254,13 +248,15 @@ class ReportsController extends Controller
 
     public function teachers()
     {
-        $recent = Teacher::latest()->take(100)->get()->map(function ($t) {
-            return [
-                'id' => $t->id,
-                'name' => $t->name ?? 'Unknown',
-                'created' => optional($t->created_at)->format('Y-m-d'),
-            ];
-        });
+        $recent = Teacher::latest()
+            ->paginate(15)
+            ->through(function ($t) {
+                return [
+                    'id' => $t->id,
+                    'name' => $t->name ?? 'Unknown',
+                    'created' => optional($t->created_at)->format('Y-m-d'),
+                ];
+            });
 
         $monthlyCounts = [];
         for ($i = 11; $i >= 0; $i--) {
@@ -282,13 +278,15 @@ class ReportsController extends Controller
 
     public function students()
     {
-        $recent = Student::latest()->take(100)->get()->map(function ($s) {
-            return [
-                'id' => $s->id,
-                'name' => $s->name ?? 'Unknown',
-                'created' => optional($s->created_at)->format('Y-m-d'),
-            ];
-        });
+        $recent = Student::latest()
+            ->paginate(15)
+            ->through(function ($s) {
+                return [
+                    'id' => $s->id,
+                    'name' => $s->name ?? 'Unknown',
+                    'created' => optional($s->created_at)->format('Y-m-d'),
+                ];
+            });
 
         $monthlyCounts = [];
         for ($i = 11; $i >= 0; $i--) {
