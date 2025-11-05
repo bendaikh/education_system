@@ -1,6 +1,6 @@
 <script setup>
 import AdminLayout from '@/Layouts/AdminLayout.vue';
-import { Head } from '@inertiajs/vue3';
+import { Head, Link as InertiaLink } from '@inertiajs/vue3';
 import { computed } from 'vue';
 import {
   Chart as ChartJS,
@@ -71,7 +71,7 @@ const countsChart = computed(() => ({
         </table>
       </div>
       <div class="flex items-center gap-2">
-        <inertia-link v-for="link in props.recent?.links || []" :key="link.label" :href="link.url || '#'" :preserve-scroll="true"
+        <InertiaLink v-for="link in props.recent?.links || []" :key="link.label" :href="link.url || '#'" :preserve-scroll="true"
           class="px-3 py-1 rounded border text-sm" :class="[link.active ? 'bg-gray-900 text-white' : 'bg-white text-gray-700 hover:bg-gray-50', !link.url ? 'opacity-50 cursor-not-allowed' : '']" v-html="link.label" />
       </div>
     </div>

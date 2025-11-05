@@ -1,6 +1,6 @@
 <script setup>
 import AdminLayout from '@/Layouts/AdminLayout.vue';
-import { Head } from '@inertiajs/vue3';
+import { Head, Link as InertiaLink } from '@inertiajs/vue3';
 import { computed } from 'vue';
 import {
   Chart as ChartJS,
@@ -103,11 +103,11 @@ const subsChart = computed(() => ({
       </div>
 
       <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
-        <inertia-link href="/admin/reports/educational-support" class="block p-4 border rounded-lg hover:bg-gray-50">Educational Support Reports</inertia-link>
-        <inertia-link href="/admin/reports/formations" class="block p-4 border rounded-lg hover:bg-gray-50">Formations Reports</inertia-link>
-        <inertia-link href="/admin/reports/childhood" class="block p-4 border rounded-lg hover:bg-gray-50">Childhood Education Reports</inertia-link>
-        <inertia-link href="/admin/reports/teachers" class="block p-4 border rounded-lg hover:bg-gray-50">Teachers Reports</inertia-link>
-        <inertia-link href="/admin/reports/students" class="block p-4 border rounded-lg hover:bg-gray-50">Students Reports</inertia-link>
+        <InertiaLink href="/admin/reports/educational-support" class="block p-4 border rounded-lg hover:bg-gray-50">Educational Support Reports</InertiaLink>
+        <InertiaLink href="/admin/reports/formations" class="block p-4 border rounded-lg hover:bg-gray-50">Formations Reports</InertiaLink>
+        <InertiaLink href="/admin/reports/childhood" class="block p-4 border rounded-lg hover:bg-gray-50">Childhood Education Reports</InertiaLink>
+        <InertiaLink href="/admin/reports/teachers" class="block p-4 border rounded-lg hover:bg-gray-50">Teachers Reports</InertiaLink>
+        <InertiaLink href="/admin/reports/students" class="block p-4 border rounded-lg hover:bg-gray-50">Students Reports</InertiaLink>
       </div>
     </div>
   </AdminLayout>
