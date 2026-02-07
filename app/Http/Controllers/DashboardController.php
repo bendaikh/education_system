@@ -89,41 +89,134 @@ class DashboardController extends Controller
             ];
         }
 
-        // Recent activity (last 10 activities)
-        $recentPayments = Payment::with('student')
+        // Recent activity - aggregate from all sources
+        $recentActivity = collect();
+
+        // Educational Support Payments
+        $eduPayments = EducationalSupportPayment::with('educationalSupportSubscription.student')
             ->latest()
             ->take(5)
             ->get()
             ->map(function ($payment) {
                 return [
-                    'id' => $payment->id,
-                    'user' => $payment->student->name ?? 'Unknown Student',
-                    'activity' => 'Payment of ' . $payment->formatted_amount,
-                    'date' => $payment->created_at->format('Y-m-d'),
-                    'status' => 'Completed'
+                    'id' => 'edu_' . $payment->id,
+                    'user' => $payment->educationalSupportSubscription->student->name ?? 'Unknown Student',
+                    'activity' => 'Educational Support Payment - ' . number_format($payment->paid_amount, 2) . ' MAD',
+                    'date' => $payment->created_at->format('Y-m-d H:i'),
+                    'timestamp' => $payment->created_at->timestamp,
+                    'status' => ucfirst($payment->status)
                 ];
             });
 
-        $recentSubscriptions = Subscription::with(['student', 'subscriptionType'])
+        // Formation Payments
+        $formationPayments = FormationPayment::with('formationSubscription.student')
             ->latest()
             ->take(5)
             ->get()
-            ->map(function ($subscription) {
+            ->map(function ($payment) {
                 return [
-                    'id' => 'sub_' . $subscription->id,
-                    'user' => $subscription->student->name ?? 'Unknown Student',
-                    'activity' => 'Subscribed to ' . ($subscription->subscriptionType->name ?? 'Unknown Plan'),
-                    'date' => $subscription->created_at->format('Y-m-d'),
-                    'status' => ucfirst($subscription->auto_status)
+                    'id' => 'form_' . $payment->id,
+                    'user' => $payment->formationSubscription->student->name ?? 'Unknown Student',
+                    'activity' => 'Formation Payment - ' . number_format($payment->amount, 2) . ' MAD',
+                    'date' => $payment->created_at->format('Y-m-d H:i'),
+                    'timestamp' => $payment->created_at->timestamp,
+                    'status' => ucfirst($payment->status)
                 ];
             });
 
-        // Merge and sort recent activities
-        $recentActivity = $recentPayments->concat($recentSubscriptions)
-                                       ->sortByDesc('date')
-                                       ->take(8)
-                                       ->values()
-                                       ->toArray();
+        // Childhood Payments
+        $childhoodPayments = ChildhoodPayment::with('childhoodSubscription.student')
+            ->latest()
+            ->take(5)
+            ->get()
+            ->map(function ($payment) {
+                return [
+                    'id' => 'child_' . $payment->id,
+                    'user' => $payment->childhoodSubscription->student->name ?? 'Unknown Student',
+                    'activity' => 'Childhood Education Payment - ' . number_format($payment->amount, 2) . ' MAD',
+                    'date' => $payment->created_at->format('Y-m-d H:i'),
+                    'timestamp' => $payment->created_at->timestamp,
+                    'status' => ucfirst($payment->status)
+                ];
+            });
+
+        // Educational Support Subscriptions
+        $eduSubscriptions = EducationalSupportSubscription::with('student')
+            ->latest()
+            ->take(3)
+            ->get()
+            ->map(function ($subscription) {
+                return [
+                    'id' => 'edu_sub_' . $subscription->id,
+                    'user' => $subscription->student->name ?? 'Unknown Student',
+                    'activity' => 'Subscribed to Educational Support',
+                    'date' => $subscription->created_at->format('Y-m-d H:i'),
+                    'timestamp' => $subscription->created_at->timestamp,
+                    'status' => 'Active'
+                ];
+            });
+
+        // Formation Subscriptions
+        $formationSubscriptions = FormationSubscription::with('student')
+            ->latest()
+            ->take(3)
+            ->get()
+            ->map(function ($subscription) {
+                return [
+                    'id' => 'form_sub_' . $subscription->id,
+                    'user' => $subscription->student->name ?? 'Unknown Student',
+                    'activity' => 'Subscribed to Formation',
+                    'date' => $subscription->created_at->format('Y-m-d H:i'),
+                    'timestamp' => $subscription->created_at->timestamp,
+                    'status' => 'Active'
+                ];
+            });
+
+        // Childhood Subscriptions
+        $childhoodSubscriptions = ChildhoodSubscription::with('student')
+            ->latest()
+            ->take(3)
+            ->get()
+            ->map(function ($subscription) {
+                return [
+                    'id' => 'child_sub_' . $subscription->id,
+                    'user' => $subscription->student->name ?? 'Unknown Student',
+                    'activity' => 'Subscribed to Childhood Education',
+                    'date' => $subscription->created_at->format('Y-m-d H:i'),
+                    'timestamp' => $subscription->created_at->timestamp,
+                    'status' => 'Active'
+                ];
+            });
+
+        // Recent Expenses
+        $recentExpenses = Expense::with('expenseCategory')
+            ->latest()
+            ->take(3)
+            ->get()
+            ->map(function ($expense) {
+                return [
+                    'id' => 'expense_' . $expense->id,
+                    'user' => $expense->vendor_name ?? 'School',
+                    'activity' => 'Expense: ' . $expense->title . ' - ' . number_format($expense->amount, 2) . ' MAD',
+                    'date' => $expense->created_at->format('Y-m-d H:i'),
+                    'timestamp' => $expense->created_at->timestamp,
+                    'status' => ucfirst($expense->status)
+                ];
+            });
+
+        // Merge all activities and sort by timestamp
+        $recentActivity = $recentActivity
+            ->concat($eduPayments)
+            ->concat($formationPayments)
+            ->concat($childhoodPayments)
+            ->concat($eduSubscriptions)
+            ->concat($formationSubscriptions)
+            ->concat($childhoodSubscriptions)
+            ->concat($recentExpenses)
+            ->sortByDesc('timestamp')
+            ->take(10)
+            ->values()
+            ->toArray();
 
         // Category stats: payments total and subscriptions count per domain
         $categoryStats = [
