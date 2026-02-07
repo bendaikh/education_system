@@ -9,17 +9,19 @@ import {
   LinearScale,
   PointElement,
   LineElement,
+  ArcElement,
   Title,
   Tooltip,
   Legend
 } from 'chart.js'
-import { Line } from 'vue-chartjs'
+import { Line, Doughnut } from 'vue-chartjs'
 
 ChartJS.register(
   CategoryScale,
   LinearScale,
   PointElement,
   LineElement,
+  ArcElement,
   Title,
   Tooltip,
   Legend
@@ -38,7 +40,9 @@ const props = defineProps({
   subscriptionStats: Array,
   totalActiveSubscriptions: Number,
   recentActivity: Array,
-  categoryStats: Object
+  categoryStats: Object,
+  expenseStats: Object,
+  expensesByCategory: Array
 });
 
 // Transform stats data for display
@@ -199,6 +203,46 @@ const subscriptionChartOptions = {
   }
 };
 
+// Expenses Chart Configuration
+const expensesChartData = computed(() => ({
+  labels: props.expensesByCategory?.map(e => {
+    const locale = language.value.locale || 'en';
+    return locale === 'fr' && e.name_fr ? e.name_fr : e.name;
+  }) || [],
+  datasets: [
+    {
+      data: props.expensesByCategory?.map(e => e.amount) || [],
+      backgroundColor: props.expensesByCategory?.map(e => e.color) || [],
+      borderWidth: 0,
+      cutout: '65%'
+    }
+  ]
+}));
+
+const expensesChartOptions = {
+  responsive: true,
+  maintainAspectRatio: false,
+  plugins: {
+    legend: {
+      display: true,
+      position: 'bottom',
+      labels: {
+        padding: 15,
+        usePointStyle: true,
+        font: { size: 11 }
+      }
+    },
+    tooltip: {
+      callbacks: {
+        label: function(context) {
+          const amount = formatLargeAmount(context.parsed);
+          return `${context.label}: ${amount}`;
+        }
+      }
+    }
+  }
+};
+
 // Calculate payment trend (sum across categories if provided)
 const paymentTrend = computed(() => {
   if (props.monthlyPaymentsByCategory && props.monthlyPaymentsByCategory.labels?.length >= 2) {
@@ -309,7 +353,75 @@ onMounted(() => {
           <Line :data="paymentChartData" :options="paymentChartOptions" />
         </div>
       </div>
+
+      <!-- Expenses Chart -->
+      <div class="bg-white rounded-xl shadow-sm border border-gray-100 p-6">
+        <div class="mb-6">
+          <h2 class="text-lg font-semibold text-gray-900">{{ language.expenses || 'Dépenses' }}</h2>
+          <p class="text-sm text-gray-500 mt-1">Ce mois</p>
+        </div>
+        <div class="h-64 flex items-center justify-center">
+          <Doughnut v-if="expensesByCategory && expensesByCategory.length > 0" :data="expensesChartData" :options="expensesChartOptions" />
+          <div v-else class="text-center text-gray-400">
+            <svg class="w-16 h-16 mx-auto mb-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+            </svg>
+            <p class="text-sm">Aucune dépense ce mois</p>
+          </div>
+        </div>
+      </div>
     </div>
+
+  <!-- Expense Statistics Cards -->
+  <div class="grid grid-cols-1 md:grid-cols-4 gap-6 mb-8">
+    <div class="bg-gradient-to-br from-red-50 to-red-100 rounded-xl shadow-sm border border-red-200 p-6">
+      <div class="flex items-center justify-between mb-2">
+        <h3 class="text-sm font-medium text-red-600">Total Dépenses</h3>
+        <div class="p-2 bg-red-200 rounded-lg">
+          <svg class="w-5 h-5 text-red-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+          </svg>
+        </div>
+      </div>
+      <p class="text-2xl font-bold text-red-900">{{ formatLargeAmount(expenseStats?.total || 0) }}</p>
+    </div>
+
+    <div class="bg-gradient-to-br from-green-50 to-green-100 rounded-xl shadow-sm border border-green-200 p-6">
+      <div class="flex items-center justify-between mb-2">
+        <h3 class="text-sm font-medium text-green-600">Payé</h3>
+        <div class="p-2 bg-green-200 rounded-lg">
+          <svg class="w-5 h-5 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+          </svg>
+        </div>
+      </div>
+      <p class="text-2xl font-bold text-green-900">{{ formatLargeAmount(expenseStats?.paid || 0) }}</p>
+    </div>
+
+    <div class="bg-gradient-to-br from-yellow-50 to-yellow-100 rounded-xl shadow-sm border border-yellow-200 p-6">
+      <div class="flex items-center justify-between mb-2">
+        <h3 class="text-sm font-medium text-yellow-600">En attente</h3>
+        <div class="p-2 bg-yellow-200 rounded-lg">
+          <svg class="w-5 h-5 text-yellow-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+          </svg>
+        </div>
+      </div>
+      <p class="text-2xl font-bold text-yellow-900">{{ formatLargeAmount(expenseStats?.pending || 0) }}</p>
+    </div>
+
+    <div class="bg-gradient-to-br from-blue-50 to-blue-100 rounded-xl shadow-sm border border-blue-200 p-6">
+      <div class="flex items-center justify-between mb-2">
+        <h3 class="text-sm font-medium text-blue-600">Ce mois</h3>
+        <div class="p-2 bg-blue-200 rounded-lg">
+          <svg class="w-5 h-5 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"></path>
+          </svg>
+        </div>
+      </div>
+      <p class="text-2xl font-bold text-blue-900">{{ formatLargeAmount(expenseStats?.thisMonth || 0) }}</p>
+    </div>
+  </div>
 
   <!-- By Category: Payments & Subscriptions -->
   <div class="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">

@@ -15,6 +15,8 @@ use App\Models\FormationSubscription;
 use App\Models\ChildhoodPayment;
 use App\Models\ChildhoodSubscription;
 use App\Models\SubscriptionType;
+use App\Models\Expense;
+use App\Models\ExpenseCategory;
 use Illuminate\Http\Request;
 use Inertia\Inertia;
 use Carbon\Carbon;
@@ -139,6 +141,34 @@ class DashboardController extends Controller
             ],
         ];
 
+        // Expense statistics
+        $expenseStats = [
+            'total' => (float) Expense::sum('amount'),
+            'paid' => (float) Expense::where('status', 'paid')->sum('amount'),
+            'pending' => (float) Expense::where('status', 'pending')->sum('amount'),
+            'thisMonth' => (float) Expense::whereYear('expense_date', now()->year)
+                                         ->whereMonth('expense_date', now()->month)
+                                         ->sum('amount'),
+        ];
+
+        // Expenses by category for pie chart
+        $expensesByCategory = Expense::with('expenseCategory')
+            ->whereYear('expense_date', now()->year)
+            ->whereMonth('expense_date', now()->month)
+            ->get()
+            ->groupBy('category_id')
+            ->map(function ($expenses, $categoryId) {
+                $category = $expenses->first()->expenseCategory;
+                return [
+                    'name' => $category ? $category->name : 'Unknown',
+                    'name_fr' => $category ? $category->name_fr : 'Inconnu',
+                    'color' => $category ? $category->color : '#6B7280',
+                    'amount' => (float) $expenses->sum('amount'),
+                ];
+            })
+            ->values()
+            ->toArray();
+
         return Inertia::render('Admin/Dashboard', [
             'stats' => $stats,
             'totalRevenue' => $totalRevenue,
@@ -148,6 +178,8 @@ class DashboardController extends Controller
             'totalActiveSubscriptions' => $totalActiveSubscriptions,
             'recentActivity' => $recentActivity,
             'categoryStats' => $categoryStats,
+            'expenseStats' => $expenseStats,
+            'expensesByCategory' => $expensesByCategory,
         ]);
     }
 }

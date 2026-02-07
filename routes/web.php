@@ -20,6 +20,8 @@ use App\Http\Controllers\TeachersController;
 use App\Http\Controllers\TeacherPaymentsController;
 use App\Http\Controllers\LanguageController;
 use App\Http\Controllers\SettingsController;
+use App\Http\Controllers\ExpenseController;
+use App\Http\Controllers\ExpenseCategoryController;
 use Illuminate\Foundation\Application;
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\HomeController;
@@ -135,6 +137,21 @@ Route::middleware(['auth', 'verified'])->prefix('admin')->name('admin.')->group(
    Route::get('/reports/childhood', [ReportsController::class, 'childhood'])->name('reports.childhood');
    Route::get('/reports/teachers', [ReportsController::class, 'teachers'])->name('reports.teachers');
    Route::get('/reports/students', [ReportsController::class, 'students'])->name('reports.students');
+
+   // Expenses Routes
+   Route::get('/expenses', [ExpenseController::class, 'index'])->name('expenses.index');
+   Route::post('/expenses', [ExpenseController::class, 'store'])->name('expenses.store');
+   Route::put('/expenses/{expense}', [ExpenseController::class, 'update'])->name('expenses.update');
+   Route::delete('/expenses/{expense}', [ExpenseController::class, 'destroy'])->name('expenses.destroy');
+   Route::patch('/expenses/{expense}/mark-as-paid', [ExpenseController::class, 'markAsPaid'])->name('expenses.mark-as-paid');
+   Route::patch('/expenses/{expense}/mark-as-cancelled', [ExpenseController::class, 'markAsCancelled'])->name('expenses.mark-as-cancelled');
+
+   // Expense Categories Routes
+   Route::get('/expense-categories', [ExpenseCategoryController::class, 'index'])->name('expense-categories.index');
+   Route::post('/expense-categories', [ExpenseCategoryController::class, 'store'])->name('expense-categories.store');
+   Route::put('/expense-categories/{category}', [ExpenseCategoryController::class, 'update'])->name('expense-categories.update');
+   Route::delete('/expense-categories/{category}', [ExpenseCategoryController::class, 'destroy'])->name('expense-categories.destroy');
+   Route::patch('/expense-categories/{category}/toggle-active', [ExpenseCategoryController::class, 'toggleActive'])->name('expense-categories.toggle-active');
 });
 
 require __DIR__.'/auth.php';
