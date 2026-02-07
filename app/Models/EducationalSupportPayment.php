@@ -29,4 +29,12 @@ class EducationalSupportPayment extends Model
     {
         return $this->belongsTo(EducationalSupportSubscription::class, 'subscription_id');
     }
+
+    /**
+     * Alias for subscription relationship (used in dashboard)
+     */
+    public function educationalSupportSubscription(): BelongsTo
+    {
+        return $this->belongsTo(EducationalSupportSubscription::class, 'subscription_id');
+    }
 }

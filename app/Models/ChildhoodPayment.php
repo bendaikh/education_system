@@ -29,4 +29,12 @@ class ChildhoodPayment extends Model
     {
         return $this->belongsTo(ChildhoodSubscription::class, 'subscription_id');
     }
+
+    /**
+     * Alias for subscription relationship (used in dashboard)
+     */
+    public function childhoodSubscription(): BelongsTo
+    {
+        return $this->belongsTo(ChildhoodSubscription::class, 'subscription_id');
+    }
 }

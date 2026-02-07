@@ -29,6 +29,12 @@ class FormationPayment extends Model
     {
         return $this->belongsTo(FormationSubscription::class, 'subscription_id');
     }
+
+    /**
+     * Alias for subscription relationship (used in dashboard)
+     */
+    public function formationSubscription(): BelongsTo
+    {
+        return $this->belongsTo(FormationSubscription::class, 'subscription_id');
+    }
 }
-
-
