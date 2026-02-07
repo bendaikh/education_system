@@ -28,7 +28,13 @@ yarn-error.log
 /.idea
 /.vscode
 
-
+# Build files (now in root for production)
+/build/
+/css/
+/js/
+/public/build/
+/public/css/
+/public/js/
 
 # OS generated files
 .DS_Store
