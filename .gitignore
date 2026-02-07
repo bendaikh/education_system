@@ -28,13 +28,13 @@ yarn-error.log
 /.idea
 /.vscode
 
-# Build files (now in root for production)
-/build/
-/css/
-/js/
-/public/build/
-/public/css/
-/public/js/
+# Build files - COMMENTED OUT to allow pushing to production (no npm on server)
+# /build/
+# /css/
+# /js/
+# /public/build/
+# /public/css/
+# /public/js/
 
 # OS generated files
 .DS_Store
