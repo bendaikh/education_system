@@ -45,6 +45,11 @@ yarn-error.log
 ehthumbs.db
 Thumbs.db
 
+# Desktop / Electron build output (generated locally; too large for GitHub)
+/dist-electron/
+/dist-app/
+/php-runtime/
+
 # Deployment files (don't commit these)
 hostinger-htaccess-redirect
 hostinger-index-php
