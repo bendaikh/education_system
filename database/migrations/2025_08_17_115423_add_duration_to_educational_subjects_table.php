@@ -11,6 +11,10 @@ return new class extends Migration
      */
     public function up(): void
     {
+        if (Schema::hasColumn('educational_subjects', 'duration')) {
+            return;
+        }
+
         Schema::table('educational_subjects', function (Blueprint $table) {
             $table->enum('duration', ['monthly', 'yearly'])->default('monthly')->after('description');
         });
@@ -21,6 +25,10 @@ return new class extends Migration
      */
     public function down(): void
     {
+        if (! Schema::hasColumn('educational_subjects', 'duration')) {
+            return;
+        }
+
         Schema::table('educational_subjects', function (Blueprint $table) {
             $table->dropColumn('duration');
         });

@@ -11,6 +11,10 @@ return new class extends Migration
      */
     public function up(): void
     {
+        if (Schema::hasColumn('educational_subjects', 'price')) {
+            return;
+        }
+
         Schema::table('educational_subjects', function (Blueprint $table) {
             $table->decimal('price', 10, 2)->default(0.00)->after('duration');
         });
@@ -21,6 +25,10 @@ return new class extends Migration
      */
     public function down(): void
     {
+        if (! Schema::hasColumn('educational_subjects', 'price')) {
+            return;
+        }
+
         Schema::table('educational_subjects', function (Blueprint $table) {
             $table->dropColumn('price');
         });
